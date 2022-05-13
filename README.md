@@ -1,3 +1,3 @@
 # Potts Model Monte Carlo
 
-Monte Carlo code for simulating Potts model using cluster algorithm.
+Monte Carlo code for simulating q-state Potts model using cluster algorithm.
