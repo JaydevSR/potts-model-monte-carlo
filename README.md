@@ -1,3 +1,3 @@
-# Potts Model 3-state 3D
+# Potts Model Monte Carlo
 
-Monte Carlo code for simulating 3-state 3D Potts model.
+Monte Carlo code for simulating Potts model using cluster algorithm.
