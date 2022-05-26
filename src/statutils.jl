@@ -58,17 +58,3 @@ function blocking_err(samples, calc_qty, args...; blocks = 20)
     err = std(block_array)
     return err
 end
-
-function ss_correlation_fn(sites::Matrix, N=Int64; metric=*)
-    ss_corrs = zeros(Float64, N)
-    nsamples = zeros(Float64, N)
-    for i=1:N
-        for j=1:N
-            r = abs(i-j)
-            ss_corrs[r+1] += metric(sites[i,i], sites[i,j]) 
-            ss_corrs[r+1] += metric(sites[i,i], sites[j,i])
-            nsamples[r+1] += 2
-        end
-    end
-    return ss_corrs ./ nsamples
-end
