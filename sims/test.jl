@@ -20,11 +20,11 @@ println("Calculating for T = $(T) ...")
 
 E_arr = zeros(Float64, nsteps)
 
-E_arr[1] = potts_hamiltonian(potts) / potts.L^2
+E_arr[1] = hamiltonian(potts) / potts.L^2
 for step=2:nsteps
     # delE = metropolis_batch_update!(potts, T)
     wolff_cluster_update!(potts, T)
-    E_arr[step] = potts_hamiltonian(potts) / potts.L^2 # E_arr[step-1] + (delE / potts.L^2)
+    E_arr[step] = hamiltonian(potts) / potts.L^2 # E_arr[step-1] + (delE / potts.L^2)
 end
 
 corrfn = autocorrelation_fn(E_arr)

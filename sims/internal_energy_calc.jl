@@ -36,13 +36,13 @@ for i = 1:length(Temps)
         metropolis_batch_update!(potts, T)
     end
 
-    E_arr[1] = potts_hamiltonian(potts) / potts.L^2
+    E_arr[1] = hamiltonian(potts) / potts.L^2
     for step=2:nsteps
         # delE = metropolis_batch_update!(potts, T)
         # E_arr[step] = E_arr[step-1] + (delE / potts.L^2)
 
         wolff_cluster_update!(potts, T)
-        E_arr[step] = potts_hamiltonian(potts) / potts.L^2
+        E_arr[step] = hamiltonian(potts) / potts.L^2
     end
 
     u_T[i] = mean(E_arr) 

@@ -1,8 +1,9 @@
-include("../src/potts.jl")
-include("../src/statutils.jl")
-
 using CairoMakie
 using Statistics
+
+include("../src/pottsmc.jl")
+include("../src/observables.jl")
+include("../src/statutils.jl")
 
 #=
 Perform simulation
@@ -33,7 +34,7 @@ for i = 1:length(Temps)
     # For Metropolis
     potts.lattice = lattice_0
     println("   | For Metropolis algorithm ...")
-    E_arr[1] = potts_hamiltonian(potts) / potts.L^2
+    E_arr[1] = hamiltonian(potts) / potts.L^2
     for step=2:nsteps
         delE = metropolis_batch_update!(potts, T)
         E_arr[step] = E_arr[step-1] + (delE / potts.L^2)
@@ -46,10 +47,10 @@ for i = 1:length(Temps)
     # For Wolff
     potts.lattice = lattice_0
     println("   | For Wolff algorithm ...")
-    E_arr[1] = potts_hamiltonian(potts) / potts.L^2
+    E_arr[1] = hamiltonian(potts) / potts.L^2
     for step=2:nsteps
         wolff_cluster_update!(potts, T)
-        E_arr[step] = potts_hamiltonian(potts) / potts.L^2
+        E_arr[step] = hamiltonian(potts) / potts.L^2
     end
     corrfn = autocorrelation_fn(E_arr)
     τ = sum(corrfn[1:500])

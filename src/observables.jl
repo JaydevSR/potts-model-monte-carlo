@@ -1,9 +1,9 @@
 """
-    potts_hamiltonian(model::PottsModel2D)
+    hamiltonian(model::PottsModel2D)
 
 Calculate the Hamiltonian for 2D potts model (J=1).
 """
-function potts_hamiltonian(model::AbstractPottsModel)
+function hamiltonian(model::AbstractPottsModel)
     H=0
     for site in CartesianIndices(model.lattice)
         nnbrs = get_nearest_neighbors(model, site)
