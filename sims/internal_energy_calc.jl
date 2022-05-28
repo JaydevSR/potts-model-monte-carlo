@@ -1,8 +1,9 @@
-include("../src/potts.jl")
-include("../src/statutils.jl")
-
 using CairoMakie
 using Statistics
+
+include("../src/pottsmc.jl")
+include("../src/observables.jl")
+include("../src/statutils.jl")
 
 #=
 Perform simulation
@@ -48,8 +49,8 @@ for i = 1:length(Temps)
     u_T[i] = mean(E_arr) 
     err_u_T[i] = blocking_err(E_arr, A -> mean(A))
 
-    c_T[i] = specific_heat(E_arr, T, potts.L)
-    err_c_T[i] = blocking_err(E_arr, specific_heat, T, potts.L)
+    c_T[i] = specific_heat(E_arr, T, potts.L^potts.d)
+    err_c_T[i] = blocking_err(E_arr, specific_heat, T, potts.L^potts.d)
     println("   |          ")
     println("   +-> Done.\n")
 end

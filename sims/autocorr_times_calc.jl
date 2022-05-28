@@ -16,7 +16,7 @@ println("    Lattice Size: $(L) x $(L)")
 println("================================\n")
 
 # Temps = [1.0]
-Temps = [i for i=0.4:0.1:1.6]
+Temps = [i for i=0.5:0.1:1.5]
 nsteps = 10000  # Number of steps for measurements
 
 auto_corr_times_metro = zeros(Int64, length(Temps))
@@ -29,31 +29,39 @@ for i = 1:length(Temps)
     T = Temps[i]
     println("Calculating for T = $(T) ...")
 
-    E_arr = zeros(Float64, nsteps)
+    m_arr = zeros(Float64, nsteps)
 
     # For Metropolis
-    potts.lattice = lattice_0
+    potts.lattice = copy(lattice_0)
     println("   | For Metropolis algorithm ...")
-    E_arr[1] = hamiltonian(potts) / potts.L^2
-    for step=2:nsteps
+    for step=1:nsteps
+        if step%10000==0
+            println("   |   | $(step / nsteps * 100) %")
+        end
+        m_arr[step] = magnetisation(potts) / potts.L^2
         delE = metropolis_batch_update!(potts, T)
-        E_arr[step] = E_arr[step-1] + (delE / potts.L^2)
     end
-    corrfn = autocorrelation_fn(E_arr)
+    corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:500])
     # println(sum(isnan.(corrfn[1:200])))
     auto_corr_times_metro[i] = convert(Int64, ceil(τ))
 
     # For Wolff
-    potts.lattice = lattice_0
+    potts.lattice = copy(lattice_0)
     println("   | For Wolff algorithm ...")
-    E_arr[1] = hamiltonian(potts) / potts.L^2
-    for step=2:nsteps
+    for step=1:nsteps
+        if step%10000==0
+            println("   |   | $(step / nsteps * 100) %")
+        end
+        m_arr[step] = magnetisation(potts) / potts.L^2
         wolff_cluster_update!(potts, T)
-        E_arr[step] = hamiltonian(potts) / potts.L^2
     end
-    corrfn = autocorrelation_fn(E_arr)
+    corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:500])
+    # scale value for comparison with Metropolis algorithm
+    if T > 1.0
+        τ = τ * (succeptibility(m_arr, T, potts.L^potts.d) * T / (potts.L^potts.d))
+    end
     auto_corr_times_wolff[i] = convert(Int64, ceil(τ))
     println("   |          ")
     println("   +-> Done.\n")

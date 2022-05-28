@@ -1,33 +1,33 @@
 # TYPE DEFINITIONS AND HELPER FUNCTIONS
 
-abstract type AbstractPottsModel{T} end
+abstract type AbstractPottsModel end
 
-mutable struct PottsModel2D{T} <: AbstractPottsModel{T} where T <: Real
+mutable struct PottsModel2D{T<:Real} <: AbstractPottsModel
     L::Int64
     q::Int64
     d::Int64
     lattice::AbstractArray{T, 2}
 end
 
-mutable struct PottsModel3D{T} <: AbstractPottsModel{T} where T <: Real
+mutable struct PottsModel3D{T<:Real} <: AbstractPottsModel
     L::Int64
     q::Int64
     d::Int64
     lattice::AbstractArray{T, 3}
 end
 
-function initialize_model_2d(L, q, cold_start::Bool=false)
+function initialize_model_2d(L, q; cold_start::Bool=false)
     if cold_start
-        lattice=fill(1, (L, L)) # Third dimension is flattened along the column
+        lattice=fill(0, (L, L))
     else
         lattice=rand(0:q-1, (L, L))
     end
     PottsModel2D{Int64}(L, q, 2, lattice)
 end
 
-function initialize_model_3d(L, q, cold_start::Bool=false)
+function initialize_model_3d(L, q; cold_start::Bool=false)
     if cold_start
-        lattice=fill(1, (L, L, L))
+        lattice=fill(0, (L, L, L))
     else
         lattice=rand(0:q-1, (L, L, L))
     end
@@ -67,7 +67,7 @@ function metropolis_batch_update!(model::AbstractPottsModel, temp::Float64)
     for i = 1:model.L^model.d
         k = CartesianIndex(Tuple(rand(1:model.L, model.d)))
         kval = model.lattice[k]
-        flip_val = mod1(rand((kval + 1):(kval + model.q - 1)), model.q)
+        flip_val = mod(rand((kval + 1):(kval + model.q - 1)), model.q)
         δE = δE_single_flip(model, k, flip_val)
         if rand() < accept_probs[δE]
             model.lattice[k] = flip_val
@@ -94,7 +94,7 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
     stack = [seed]
     sval = model.lattice[seed]
     # choose a random spin out of other values
-    new_val = mod1(rand((sval + 1):(sval + model.q - 1)), model.q)
+    new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
     cluster[seed] = true
     while !isempty(stack)
         k = pop!(stack)

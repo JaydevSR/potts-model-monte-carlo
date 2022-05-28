@@ -1,7 +1,7 @@
 """
-    hamiltonian(model::PottsModel2D)
+    hamiltonian(model::AbstractPottsModel)
 
-Calculate the Hamiltonian for 2D potts model (J=1).
+Calculate the Hamiltonian for q-state potts model (J=1).
 """
 function hamiltonian(model::AbstractPottsModel)
     H=0
@@ -17,20 +17,35 @@ function hamiltonian(model::AbstractPottsModel)
 end
 
 """
-    specific_heat(u_vals, T, N)
+    magnetisation(model::AbstractPottsModel)
 
-Calculate the specific heat from given array of internal energy per site (`N²` sites) at temperature `T`.
+Calculate the total magnetisation for q-state potts model.
 """
-function specific_heat(u_vals, T, N)
-    return (T^-2) * N^2 * var(u_vals, corrected = false)
+
+function magnetisation(model::AbstractPottsModel)
+    M=0
+    counts = zeros(Int64, model.q)
+    for site in CartesianIndices(model.lattice)
+        counts[model.lattice[site] + 1] += 1
+    end
+    return (model.q/(model.q - 1)) * maximum(counts .- model.L^model.d / model.q)
+end
+
+"""
+    specific_heat(u_vals, T, ns)
+
+Calculate the specific heat from given array of internal energy per site (total `ns` sites) at temperature `T`.
+"""
+function specific_heat(u_vals, T, ns)
+    return (T^-2) * ns * var(u_vals, corrected = false)
 end
 
 
 """
     succeptibility(m_vals, T, N)
 
-Calculate the succeptibility from given array of mean magnetization per site (`N²` sites) at temperature `T`.
+Calculate the succeptibility from given array of mean magnetization per site (total `ns` sites) at temperature `T`.
 """
-function succeptibility(m_vals, T, N)
-    return (T^-2) * N^2 * var(m_vals, corrected = false)
+function succeptibility(m_vals, T, ns)
+    return (T^-2) * ns * var(m_vals, corrected = false)
 end
