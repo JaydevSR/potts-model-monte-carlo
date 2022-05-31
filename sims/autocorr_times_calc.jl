@@ -1,5 +1,6 @@
 using CairoMakie
 using Statistics
+using DelimitedFiles
 
 include("../src/pottsmc.jl")
 include("../src/observables.jl")
@@ -16,14 +17,18 @@ println("    Lattice Size: $(L) x $(L)")
 println("================================\n")
 
 # Temps = [1.0]
-Temps = [i for i=0.5:0.1:1.5]
-nsteps = 10000  # Number of steps for measurements
+Temps = [0.5, 0.7, 0.9, 0.98, 1.0, 1.02, 1.1, 1.3, 1.5]
+nsteps = 50000  # Number of steps for measurements
+wsteps = 5000
 
 auto_corr_times_metro = zeros(Int64, length(Temps))
 auto_corr_times_wolff = zeros(Int64, length(Temps))
 
 potts = initialize_model_2d(L, q)
 lattice_0 = copy(potts.lattice)
+
+data_mat = zeros(Float64, (3, length(Temps)))
+data_mat[1, :] = copy(Temps)
 
 for i = 1:length(Temps)
     T = Temps[i]
@@ -42,7 +47,7 @@ for i = 1:length(Temps)
         delE = metropolis_batch_update!(potts, T)
     end
     corrfn = autocorrelation_fn(m_arr)
-    τ = sum(corrfn[1:500])
+    τ = sum(corrfn[1:wsteps])
     # println(sum(isnan.(corrfn[1:200])))
     auto_corr_times_metro[i] = convert(Int64, ceil(τ))
 
@@ -57,7 +62,7 @@ for i = 1:length(Temps)
         wolff_cluster_update!(potts, T)
     end
     corrfn = autocorrelation_fn(m_arr)
-    τ = sum(corrfn[1:500])
+    τ = sum(corrfn[1:wsteps])
     # scale value for comparison with Metropolis algorithm
     if T > 1.0
         τ = τ * (succeptibility(m_arr, T, potts.L^potts.d) * T / (potts.L^potts.d))
@@ -69,6 +74,12 @@ end
 
 println("Using Metropolis: $(auto_corr_times_metro)")
 println("Using Wolff: $(auto_corr_times_wolff)")
+data_mat[2, :] = auto_corr_times_metro
+data_mat[3, :] = auto_corr_times_wolff
+
+open("D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corr_data.txt", "w") do io
+    writedlm(io, data_mat, ',')
+end;
 
 #=
 Plots

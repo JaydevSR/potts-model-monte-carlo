@@ -1,4 +1,5 @@
-include("../src/potts.jl")
+include("../src/pottsmc.jl")
+include("../src/observables.jl")
 include("../src/statutils.jl")
 
 using CairoMakie
@@ -14,20 +15,27 @@ println("    Lattice Size: $(L) x $(L)")
 println("================================\n")
 
 T = 1.0
-nsteps = 10000
+nsteps = 50000
 
 println("Calculating for T = $(T) ...")
 
-E_arr = zeros(Float64, nsteps)
+m_arr = zeros(Float64, nsteps)
+potts = initialize_model_2d(L, q)
 
-E_arr[1] = hamiltonian(potts) / potts.L^2
-for step=2:nsteps
+for step=1:nsteps
+    if step%5000==0
+        println("   |   | $(step / nsteps * 100) %")
+    end
+    m_arr[step] = magnetisation(potts) / potts.L^2
     # delE = metropolis_batch_update!(potts, T)
     wolff_cluster_update!(potts, T)
-    E_arr[step] = hamiltonian(potts) / potts.L^2 # E_arr[step-1] + (delE / potts.L^2)
 end
 
-corrfn = autocorrelation_fn(E_arr)
-
-s = scatter(corrfn[1:250])
+corrfn1 = autocorrelation_fn(m_arr[1:nsteps÷2])
+corrfn2 = autocorrelation_fn(m_arr[(nsteps÷2+1):nsteps])
+corrfn3 = autocorrelation_fn(m_arr)
+s = lines(corrfn1[1:500], color=:blue, label="first half")
+lines!(corrfn2[1:500], color=:red, label="second half")
+lines!(corrfn3[1:500], color=:black, label="complete ($nsteps)")
+axislegend()
 display(s)
