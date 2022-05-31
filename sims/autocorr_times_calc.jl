@@ -18,13 +18,13 @@ println("================================\n")
 
 # Temps = [1.0]
 Temps = [0.5, 0.7, 0.9, 0.98, 1.0, 1.02, 1.1, 1.3, 1.5]
-nsteps = 50000  # Number of steps for measurements
-wsteps = 5000
+nsteps = 20000  # Number of steps for measurements
+wsteps = 500
 
 auto_corr_times_metro = zeros(Int64, length(Temps))
 auto_corr_times_wolff = zeros(Int64, length(Temps))
 
-potts = initialize_model_2d(L, q)
+potts = initialize_model_2d(L, q; cold_start=true)
 lattice_0 = copy(potts.lattice)
 
 data_mat = zeros(Float64, (3, length(Temps)))
@@ -39,28 +39,37 @@ for i = 1:length(Temps)
     # For Metropolis
     potts.lattice = copy(lattice_0)
     println("   | For Metropolis algorithm ...")
+
+    print("   |   | Progress: [")
     for step=1:nsteps
-        if step%10000==0
-            println("   |   | $(step / nsteps * 100) %")
+        if step%1000==0
+            print("*")
         end
         m_arr[step] = magnetisation(potts) / potts.L^2
         delE = metropolis_batch_update!(potts, T)
     end
+    print("]\n")
+
     corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:wsteps])
     # println(sum(isnan.(corrfn[1:200])))
     auto_corr_times_metro[i] = convert(Int64, ceil(τ))
+    println("   |   | τ = $(auto_corr_times_metro[i])")
 
     # For Wolff
     potts.lattice = copy(lattice_0)
     println("   | For Wolff algorithm ...")
+
+    print("   |   | Progress: [")
     for step=1:nsteps
-        if step%10000==0
-            println("   |   | $(step / nsteps * 100) %")
+        if step%1000==0
+            print("*")
         end
         m_arr[step] = magnetisation(potts) / potts.L^2
         wolff_cluster_update!(potts, T)
     end
+    print("]\n")
+
     corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:wsteps])
     # scale value for comparison with Metropolis algorithm
@@ -68,8 +77,8 @@ for i = 1:length(Temps)
         τ = τ * (succeptibility(m_arr, T, potts.L^potts.d) * T / (potts.L^potts.d))
     end
     auto_corr_times_wolff[i] = convert(Int64, ceil(τ))
-    println("   |          ")
-    println("   +-> Done.\n")
+    println("   |   | τ = $(auto_corr_times_wolff[i])")
+    println("   +----> Done.\n")
 end
 
 println("Using Metropolis: $(auto_corr_times_metro)")
