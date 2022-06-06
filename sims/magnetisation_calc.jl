@@ -15,9 +15,9 @@ println("================================\n")
 println("    Lattice Size: $(L) x $(L)")
 println("================================\n")
 
-Temps = [i for i=0.1:0.2:2.1]
+Temps = [0.5, 0.7, 0.9, 0.98, 1.0, 1.02, 1.1, 1.3, 1.5]
 esteps = 1000  # Number of steps for equilibration
-nsteps = 5000  # Number of steps for measurements
+nsteps = 20000  # Number of steps for measurements
 
 m_T = zeros(Float64, length(Temps))  # Array of magnetisation per site
 err_m_T = zeros(Float64, length(Temps))
@@ -33,23 +33,26 @@ for i = 1:length(Temps)
 
     m_arr = zeros(Float64, nsteps)
 
+    println("   | Making measurements ...")
     for step=1:esteps
         metropolis_batch_update!(potts, T)
+        # wolff_cluster_update!(potts, T)
     end
 
     m_arr[1] = magnetisation(potts) / potts.L^2
     for step=2:nsteps
         metropolis_batch_update!(potts, T)
-
         # wolff_cluster_update!(potts, T)
+
         m_arr[step] = magnetisation(potts) / potts.L^2
     end
 
+    println("   | Calculating observables ...")
     m_T[i] = mean(m_arr) 
-    err_m_T[i] = blocking_err(m_arr, A -> mean(A))
+    err_m_T[i] = blocking_err(m_arr, A -> mean(A); blocks=50)
 
     χ_T[i] = succeptibility(m_arr, T, potts.L^potts.d)
-    err_χ_T[i] = blocking_err(m_arr, specific_heat, T, potts.L^potts.d)
+    err_χ_T[i] = blocking_err(m_arr, specific_heat, T, potts.L^potts.d; blocks=50)
     println("   |          ")
     println("   +-> Done.\n")
 end
@@ -84,7 +87,7 @@ scatter!(
     markersize = 7
 )
 
-save("plots/2Dmodel/mag_and_suzz_vs_Temp_$(L)_metropolis.pdf", f)
+save("plots/2Dmodel/mag_and_suzz_vs_Temp_$(L)_metro.pdf", f)
 
 println("Program Finished!")
 println("===========================\n")
