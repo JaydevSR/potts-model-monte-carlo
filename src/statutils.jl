@@ -58,3 +58,7 @@ function blocking_err(samples, calc_qty, args...; blocks = 20)
     err = std(block_array)
     return err
 end
+
+function cumulant(samples)
+    #TODO
+end

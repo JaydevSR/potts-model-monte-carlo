@@ -15,7 +15,7 @@ q = 3
 cold_start = true
 err_nblocks = 25
 esteps = 1000  # Number of steps for equilibration
-nconfigs = 10000  # Number of steps for measurements
+nconfigs = 20000  # Number of steps for measurements
 
 
 data_path = "D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corrtimes_data.txt"

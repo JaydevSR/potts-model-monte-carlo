@@ -18,15 +18,15 @@ println(".==================================")
 println("|                                  ")
 
 # Temps = [1.0]
-Temps = [0.5, 0.7, 0.9, 0.94, 0.98, 1.0, 1.02, 1.06, 1.1, 1.3, 1.5]
+Temps = [0.5, 0.7, 0.9, 0.94, 0.98, 1.02, 1.06, 1.1, 1.3, 1.5]
 nsteps = 40000  # Number of steps for measurements
-wsteps = 500
+wsteps = 250
 esteps = 2000
 verbose = false
 
-auto_corr_times_metro = zeros(Int64, length(Temps))
-auto_corr_times_wolff = zeros(Int64, length(Temps))
-auto_corr_times_wolff_scaled = zeros(Int64, length(Temps))
+auto_corr_times_metro = zeros(Float64, length(Temps))
+auto_corr_times_wolff = zeros(Float64, length(Temps))
+auto_corr_times_wolff_scaled = zeros(Float64, length(Temps))
 
 data_mat = zeros(Float64, (4, length(Temps)))
 data_mat[1, :] = copy(Temps)
@@ -48,8 +48,7 @@ Threads.@threads for i = 1:length(Temps)
     end
 
     corrfn = autocorrelation_fn(m_arr)
-    τ = sum(corrfn[1:wsteps])
-    auto_corr_times_metro[i] = convert(Int64, ceil(τ))
+    auto_corr_times_metro[i] = sum(corrfn[1:wsteps])
 
     # For Wolff
     potts = initialize_model_2d(L, q; cold_start=true)
@@ -64,12 +63,12 @@ Threads.@threads for i = 1:length(Temps)
 
     corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:wsteps])
-    auto_corr_times_wolff[i] = convert(Int64, ceil(τ))
+    auto_corr_times_wolff[i] = τ
     # scale value for comparison with Metropolis algorithm
-    if T > 1.06
+    if T >= 1.06
         τ = τ * (succeptibility(m_arr, T, potts.L^potts.d) * T / (potts.L^potts.d))
     end
-    auto_corr_times_wolff_scaled[i] = convert(Int64, ceil(τ))
+    auto_corr_times_wolff_scaled[i] = τ
     println("| Process complete on thread #$(Threads.threadid()) (T = $T): τ = $(auto_corr_times_metro[i]), $(auto_corr_times_wolff_scaled[i]) ($(auto_corr_times_wolff[i]))")
 end
 
@@ -78,9 +77,9 @@ println("| Using Metropolis: $(auto_corr_times_metro)")
 println("| Using Wolff: $(auto_corr_times_wolff)")
 println("| Using Wolff (Scaled): $(auto_corr_times_wolff_scaled)")
 println("| ")
-data_mat[2, :] = auto_corr_times_metro
-data_mat[3, :] = auto_corr_times_wolff
-data_mat[4, :] = auto_corr_times_wolff_scaled
+data_mat[2, :] = convert.(Int64, ceil.(auto_corr_times_metro))
+data_mat[3, :] = convert.(Int64, ceil.(auto_corr_times_wolff))
+data_mat[4, :] = convert.(Int64, ceil.(auto_corr_times_wolff_scaled))
 
 open("D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corrtimes_data.txt", "w") do io
     writedlm(io, data_mat, ',')
