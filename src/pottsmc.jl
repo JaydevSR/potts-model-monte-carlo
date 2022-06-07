@@ -19,7 +19,7 @@ mutable struct PottsModel2D{T<:Integer} <: AbstractPottsModel
     end
 end
 
-PottsModel2D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel2D{Integer}(L, q, start)
+PottsModel2D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel2D{T}(L, q, start)
 
 mutable struct PottsModel3D{T<:Integer} <: AbstractPottsModel
     L::T
@@ -38,7 +38,7 @@ mutable struct PottsModel3D{T<:Integer} <: AbstractPottsModel
     end
 end
 
-PottsModel3D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel3D{Integer}(L, q, start)
+PottsModel3D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel3D{T}(L, q, start)
 
 function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
     shifts = CartesianIndex.([
