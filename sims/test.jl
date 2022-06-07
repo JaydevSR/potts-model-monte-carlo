@@ -20,7 +20,7 @@ nsteps = 50000
 println("Calculating for T = $(T) ...")
 
 m_arr = zeros(Float64, nsteps)
-potts = initialize_model_2d(L, q)
+potts = PottsModel2D(L, q, :cold)
 
 for step=1:nsteps
     if step%5000==0

@@ -25,7 +25,7 @@ err_m_T = zeros(Float64, length(Temps))
 χ_T = zeros(Float64, length(Temps))  # Array of specific heat
 err_χ_T = zeros(Float64, length(Temps))
 
-potts = initialize_model_2d(L, q; cold_start=true)
+potts = PottsModel2D(L, q, :cold)
 
 for i = 1:length(Temps)
     T = Temps[i]

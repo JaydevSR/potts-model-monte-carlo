@@ -2,37 +2,43 @@
 
 abstract type AbstractPottsModel end
 
-mutable struct PottsModel2D{T<:Real} <: AbstractPottsModel
-    L::Int64
-    q::Int64
-    d::Int64
+mutable struct PottsModel2D{T<:Integer} <: AbstractPottsModel
+    L::T
+    q::T
+    d::T
     lattice::AbstractArray{T, 2}
+    function PottsModel2D{T}(L::T, q::T, start::Symbol) where T<:Integer
+        if start==:cold
+            lattice=fill(zero(T), (L, L))
+        elseif start==:hot
+            lattice=rand(zero(T):zero(T)+q-1, (L, L))
+        else
+            error("Start state can be one of symbols :$(:cold) or :$(:hot)")
+        end
+        new{T}(L, q, 2, lattice)
+    end
 end
 
-mutable struct PottsModel3D{T<:Real} <: AbstractPottsModel
-    L::Int64
-    q::Int64
-    d::Int64
+PottsModel2D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel2D{Integer}(L, q, start)
+
+mutable struct PottsModel3D{T<:Integer} <: AbstractPottsModel
+    L::T
+    q::T
+    d::T
     lattice::AbstractArray{T, 3}
+    function PottsModel3D{T}(L::T, q::T, start::Symbol) where T<:Integer
+        if start==:cold
+            lattice=fill(zero(T), (L, L, L))
+        elseif start==:hot
+            lattice=rand(zero(T):zero(T)+q-1, (L, L, L))
+        else
+            error("Start state can be one of symbols :$(:cold) or :$(:hot)")
+        end
+        new{T}(L, q, 3, lattice)
+    end
 end
 
-function initialize_model_2d(L, q; cold_start::Bool=false)
-    if cold_start
-        lattice=fill(0, (L, L))
-    else
-        lattice=rand(0:q-1, (L, L))
-    end
-    PottsModel2D{Int64}(L, q, 2, lattice)
-end
-
-function initialize_model_3d(L, q; cold_start::Bool=false)
-    if cold_start
-        lattice=fill(0, (L, L, L))
-    else
-        lattice=rand(0:q-1, (L, L, L))
-    end
-    PottsModel3D{Int64}(L, q, 3, lattice)
-end
+PottsModel3D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel3D{Integer}(L, q, start)
 
 function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
     shifts = CartesianIndex.([

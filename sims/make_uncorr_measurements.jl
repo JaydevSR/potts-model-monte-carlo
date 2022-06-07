@@ -12,7 +12,7 @@ Perform simulation
 
 L = 16
 q = 3
-cold_start = true
+start = :cold
 err_nblocks = 100
 esteps = 1000  # Number of steps for equilibration
 nconfigs = 5000  # Number of steps for measurements
@@ -33,7 +33,7 @@ for i = 1:length(Temps)
     println("| Process strarted on thread #$(Threads.threadid()): T = $(T)")
 
     location="ising_uncorr_configs_Temp$(Temps[stepT])_N$(N).txt"
-    potts = initialize_model_2d(L, q; cold_start=cold_start)
+    potts = PottsModel2D(L, q; start)
     uncorrelated_spins = zeros(Float64, (L, L, nconfigs))
     for step=1:esteps
         wolff_cluster_update!(potts, T)

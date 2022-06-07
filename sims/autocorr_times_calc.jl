@@ -37,7 +37,7 @@ Threads.@threads for i = 1:length(Temps)
     m_arr = zeros(Float64, nsteps)
 
     # For Metropolis
-    potts = initialize_model_2d(L, q; cold_start=true)
+    potts = PottsModel2D(L, q, :cold)
     for step=1:esteps
         metropolis_batch_update!(potts, T)
     end
@@ -51,7 +51,7 @@ Threads.@threads for i = 1:length(Temps)
     auto_corr_times_metro[i] = sum(corrfn[1:wsteps])
 
     # For Wolff
-    potts = initialize_model_2d(L, q; cold_start=true)
+    potts = PottsModel2D(L, q, :cold)
     for step=1:esteps
         wolff_cluster_update!(potts, T)
     end

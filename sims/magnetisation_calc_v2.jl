@@ -12,7 +12,7 @@ Perform simulation
 
 L = 16
 q = 3
-cold_start = true
+start = :cold
 err_nblocks = 25
 esteps = 1000  # Number of steps for equilibration
 nconfigs = 10000  # Number of steps for measurements
@@ -39,7 +39,7 @@ Threads.@threads for i = 1:length(Temps)
     println("| Process strarted on thread #$(Threads.threadid()): T = $(T)")
     m_arr = zeros(Float64, nconfigs)
 
-    local potts = initialize_model_2d(L, q; cold_start=cold_start)
+    local potts = PottsModel2D(L, q, start)
     for step=1:esteps
         wolff_cluster_update!(potts, T)
     end

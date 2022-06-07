@@ -28,13 +28,11 @@ for i=1:length(Temps)
     ax3 = Axis(f[2, 1:2], xlabel="step", ylabel="magnetisation", title="wolff", xticks=LinearTicks(10))
     ax4 = Axis(f[2, 3], xlabel="step", ylabel="magnetisation", title="wolff", xticks=LinearTicks(10))
 
-    potts2d = initialize_model_2d(L, q; cold_start=false)
-    hot_save = copy(potts2d.lattice)
     m_arr = zeros(Float64, nsteps)
-
     # metropolis_batch_update
     println("   | Metropolis algorithm ...")
     println("   |   | Hot start ...")
+    potts2d = PottsModel2D(L, q, :hot)
     for step=1:nsteps
         m_arr[step] = magnetisation(potts2d) / potts2d.L^2
         metropolis_batch_update!(potts2d, T)
@@ -43,7 +41,7 @@ for i=1:length(Temps)
     scatterlines!(ax2, m_arr[1:1000], color=:red, label="hot start", markersize=3, markercolor=:red)
 
     println("   |   | Cold start ...")
-    potts2d.lattice = zero(potts2d.lattice)
+    potts2d = PottsModel2D(L, q, :cold)
     for step=1:nsteps
         m_arr[step] = magnetisation(potts2d) / potts2d.L^2
         metropolis_batch_update!(potts2d, T)
@@ -55,7 +53,7 @@ for i=1:length(Temps)
     # wolff_cluster_update
     println("   | Wolff algorithm ...")
     println("   |   | Hot start ...")
-    potts2d.lattice = copy(hot_save)
+    potts2d = PottsModel2D(L, q, :hot)
     for step=1:nsteps
         m_arr[step] = magnetisation(potts2d) / potts2d.L^2
         wolff_cluster_update!(potts2d, T)
@@ -64,7 +62,7 @@ for i=1:length(Temps)
     scatterlines!(ax4, m_arr[1:1000], color=:red, label="hot start", markersize=3, markercolor=:red)
 
     println("   |   | Cold start ...")
-    potts2d.lattice = zero(potts2d.lattice)
+    potts2d = PottsModel2D(L, q, :cold)
     for step=1:nsteps
         m_arr[step] = magnetisation(potts2d) / potts2d.L^2
         wolff_cluster_update!(potts2d, T)
