@@ -1,10 +1,6 @@
-using CairoMakie
-using Statistics
 using DelimitedFiles
 
 include("../src/pottsmc.jl")
-include("../src/observables.jl")
-include("../src/statutils.jl")
 
 #=
 Perform simulation

@@ -1,6 +1,4 @@
 include("../src/pottsmc.jl")
-include("../src/observables.jl")
-include("../src/statutils.jl")
 
 using CairoMakie
 
