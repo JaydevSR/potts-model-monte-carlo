@@ -12,7 +12,7 @@ function metropolis_batch_update!(model::AbstractPottsModel, temp::Float64)
         kval = model.lattice[k]
         flip_val = mod(rand((kval + 1):(kval + model.q - 1)), model.q)
         δE = δE_single_flip(model, k, flip_val)
-        if rand(MersenneTwister()) < accept_probs[δE]
+        if rand() < accept_probs[δE]
             model.lattice[k] = flip_val
             ΔE += δE 
         end
@@ -46,7 +46,7 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
         nnbrs = get_nearest_neighbors(model, k)
         for nn ∈ nnbrs
             nnval = model.lattice[nn]
-            if kval == nnval && !cluster[nn] && rand(MersenneTwister()) < P_add
+            if kval == nnval && !cluster[nn] && rand() < P_add
                 push!(stack, nn)
                 cluster[nn] = true
             end
