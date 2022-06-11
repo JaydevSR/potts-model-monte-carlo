@@ -1,5 +1,6 @@
-using Randoms
-using Statistics
+using Random
+using StatsKit
+using StaticArrays
 
 include("models.jl")
 include("mcalgos.jl")

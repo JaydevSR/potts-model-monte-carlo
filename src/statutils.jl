@@ -59,6 +59,21 @@ function blocking_err(samples, calc_qty, args...; blocks = 20)
     return err
 end
 
-function cumulant(samples)
-    #TODO
+function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
+    cmoms = zeros(Float64, last(k))
+    cumls = zeros(Float64, last(k))
+    cmoms[1] = 0
+    cumls[1] = m
+    for i=2:last(k)
+        cmoms[i] =  moment(samples, i)
+        kn = cmoms[i]
+        for j=2:i-2
+            kn -= binomial(i-1, j)*cmoms[j]*cumls[m-j]
+        end
+        cumls[i] = kn
+    end
+    return cumls[k]
 end
+
+cumulant(samples::Array{<:Real}, k::Int, m::Real) = cumulant(samples, 1:k, m)[k]
+cumulant(samples::Array{<:Real}, k::Union{Int, UnitRange{Int}}) = cumulant(samples, k, mean(samples))

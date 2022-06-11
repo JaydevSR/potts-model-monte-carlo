@@ -30,22 +30,3 @@ function magnetisation(model::AbstractPottsModel)
     end
     return (model.q/(model.q - 1)) * maximum(counts .- model.L^model.d / model.q)
 end
-
-"""
-    specific_heat(u_vals, T, ns)
-
-Calculate the specific heat from given array of internal energy per site (total `ns` sites) at temperature `T`.
-"""
-function specific_heat(u_vals, T, ns)
-    return (T^-2) * ns * var(u_vals, corrected = false)
-end
-
-
-"""
-    succeptibility(m_vals, T, N)
-
-Calculate the succeptibility from given array of mean magnetization per site (total `ns` sites) at temperature `T`.
-"""
-function succeptibility(m_vals, T, ns)
-    return (T^-2) * ns * var(m_vals, corrected = false)
-end

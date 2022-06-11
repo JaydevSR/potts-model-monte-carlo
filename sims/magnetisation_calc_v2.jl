@@ -12,7 +12,7 @@ q = 3
 start = :cold
 err_nblocks = 25
 esteps = 1000  # Number of steps for equilibration
-nconfigs = 10000  # Number of steps for measurements
+nconfigs = 1000  # Number of steps for measurements
 
 
 data_path = "D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corrtimes_data.txt"
@@ -53,8 +53,9 @@ Threads.@threads for i = 1:length(Temps)
     m_T[i] = mean(m_arr) 
     err_m_T[i] = blocking_err(m_arr, A -> mean(A); blocks=err_nblocks)
 
+    succeptibility(mags, T, nsites) = (1/T) * nsites * cumulant(mags, 2)
     suzz_T[i] = succeptibility(m_arr, T, potts.L^potts.d)
-    err_suzz_T[i] = blocking_err(m_arr, specific_heat, T, potts.L^potts.d; blocks=err_nblocks)
+    err_suzz_T[i] = blocking_err(m_arr, succeptibility, T, potts.L^potts.d; blocks=err_nblocks)
 
     println("| Process complete on thread #$(Threads.threadid()): T = $T")
 end
@@ -89,7 +90,7 @@ scatter!(
     markersize = 7
 )
 
-save("plots/2Dmodel/mag_and_suzz_vs_Temp_$(L)_uncorr_wolff.png", f)
+save("plots/2Dmodel/mag_and_suzz_vs_Temp_$(L)_uncorr_wolff_vtest.png", f)
 
 println("| Program Finished!")
 println(".==================================")
