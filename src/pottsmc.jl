@@ -1,6 +1,8 @@
-using Random
 using StatsKit
 using StaticArrays
+using DelimitedFiles
+using CairoMakie
+using Random
 
 include("models.jl")
 include("mcalgos.jl")

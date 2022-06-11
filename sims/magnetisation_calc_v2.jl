@@ -1,6 +1,3 @@
-using CairoMakie
-using DelimitedFiles
-
 include("../src/pottsmc.jl")
 
 #=

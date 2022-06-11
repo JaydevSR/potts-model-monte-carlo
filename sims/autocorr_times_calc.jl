@@ -1,5 +1,3 @@
-using DelimitedFiles
-
 include("../src/pottsmc.jl")
 
 #=

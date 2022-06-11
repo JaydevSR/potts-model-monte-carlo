@@ -1,5 +1,3 @@
-using CairoMakie
-
 include("../src/pottsmc.jl")
 
 #=
