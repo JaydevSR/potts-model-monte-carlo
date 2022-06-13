@@ -75,7 +75,7 @@ data_mat[2, :] = convert.(Int64, ceil.(auto_corr_times_metro))
 data_mat[3, :] = convert.(Int64, ceil.(auto_corr_times_wolff))
 data_mat[4, :] = convert.(Int64, ceil.(auto_corr_times_wolff_scaled))
 
-open("D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corrtimes_data.txt", "w") do io
+open("data/corrtimes_data.txt", "w") do io
     writedlm(io, data_mat, ',')
 end;
 

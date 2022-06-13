@@ -9,10 +9,10 @@ q = 3
 start = :cold
 err_nblocks = 25
 esteps = 1000  # Number of steps for equilibration
-nconfigs = 1000  # Number of steps for measurements
+nconfigs = 10000  # Number of steps for measurements
 
 
-data_path = "D:\\Projects\\Potts-QCD\\potts-model-monte-carlo\\data\\corrtimes_data.txt"
+data_path = "data/corrtimes_data.txt"
 data = readdlm(data_path, ',', Float64)
 Temps = data[1, :]
 autocorr_steps_wolff = convert.(Int64, data[3, :])
