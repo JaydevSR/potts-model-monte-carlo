@@ -28,17 +28,17 @@ Threads.@threads for i = 1:length(Temps)
     println("| Process strarted on thread #$(Threads.threadid()): T = $(T)")
     m_arr = zeros(Float64, nsteps)
     potts = PottsModel2D(L, q, :cold)
-    for step=1:esteps
+    e1 = @elapsed for step=1:esteps
         wolff_cluster_update!(potts, T)
     end
-    for step=1:nsteps
+    e2 = @elapsed for step=1:nsteps
         m_arr[step] = magnetisation(potts) / potts.L^2
         wolff_cluster_update!(potts, T)
     end
     corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:wsteps])
     auto_corr_times_wolff[i] = τ
-    println("| Process complete on thread #$(Threads.threadid()) (T = $T): τ = $(auto_corr_times_wolff[i])")
+    println("| Process complete on thread #$(Threads.threadid()) (T = $T): τ = $(auto_corr_times_wolff[i]), $(e1+e2) seconds.")
 end
 
 println("| ")
