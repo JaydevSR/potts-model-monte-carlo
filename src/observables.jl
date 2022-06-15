@@ -23,7 +23,6 @@ Calculate the total magnetisation for q-state potts model.
 """
 
 function magnetisation(model::AbstractPottsModel)
-    M=0
     counts = zeros(Int64, model.q)
     for site in CartesianIndices(model.lattice)
         counts[model.lattice[site] + 1] += 1
