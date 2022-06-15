@@ -33,23 +33,23 @@ end
 function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
     P_add = 1 - exp(-1/temp)
     cluster = falses(size(model.lattice))
-    seed = CartesianIndex(Tuple(rand(1:model.L, model.d)))
+    seed = rand(1:model.L, model.d)
     stack = [seed]
     sizehint!(stack, model.L^model.d)
-    sval = model.lattice[seed]
+    sval = model.lattice[seed...]
     # choose a random spin out of other values
     new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
-    cluster[seed] = true
+    cluster[seed...] = true
     while !isempty(stack)
         k = pop!(stack)
-        kval = model.lattice[k]
-        model.lattice[k] = new_val  # set new value
+        kval = model.lattice[k...]
+        model.lattice[k...] = new_val  # set new value
         nnbrs = get_nearest_neighbors(model, k)
         for nn ∈ nnbrs
-            nnval = model.lattice[nn]
-            if kval == nnval && !cluster[nn] && rand() < P_add
+            nnval = model.lattice[nn...]
+            if kval == nnval && !cluster[nn...] && rand() < P_add
                 push!(stack, nn)
-                cluster[nn] = true
+                cluster[nn...] = true
             end
         end
     end

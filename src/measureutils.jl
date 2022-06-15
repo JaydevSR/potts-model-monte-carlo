@@ -17,9 +17,9 @@ function potts_getconfigdata_to_txt(
         verbose && println(".==================================")
         verbose && println("|  ")
 
-        ispath(store_at*"Size$L") ? 1 : mkpath(store_at*"Size$L")
+        szpath = joinpath([store_at, "Size$L"])
+        ispath(szpath) ? 1 : mkpath(szpath)
         Threads.@threads for stepT in 1:length(temps)
-            filename="Size$L/potts_uncorr_configs_temp$(temps[stepT])_L$(L).txt"
             T = temps[stepT]
             verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
             
@@ -45,7 +45,9 @@ function potts_getconfigdata_to_txt(
                     uncorrelated_spins[:, j÷nτ] = reshape(potts.lattice, potts.L^potts.d)
                 end
             end
-            open(store_at*filename, "w") do io
+
+            filename="potts_uncorr_configs_temp$(temps[stepT])_L$(L).txt"
+            open(joinpath([szpath, filename]), "w") do io
                 writedlm(io, uncorrelated_spins, ',')
             end;
             verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
@@ -75,9 +77,9 @@ function potts_getmagdata_to_txt(
         verbose && println(".==================================")
         verbose && println("|  ")
 
-        ispath(store_at*"Size$L") ? 1 : mkpath(store_at*"Size$L")
+        szpath = joinpath([store_at, "Size$L"])
+        ispath(szpath) ? 1 : mkpath(szpath)
         Threads.@threads for stepT in 1:length(temps)
-            filename="Size$L/potts_mags_temp$(temps[stepT])_L$(L).txt"
             T = temps[stepT]
             verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T))")
             
@@ -103,7 +105,9 @@ function potts_getmagdata_to_txt(
                     mags[j÷nτ] = magnetisation(potts)
                 end
             end
-            open(store_at*filename, "w") do io
+
+            filename="potts_mags_temp$(temps[stepT])_L$(L).txt"
+            open(joinpath([szpath, filename]), "w") do io
                 writedlm(io, mags, ',')
             end;
             verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
