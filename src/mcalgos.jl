@@ -35,6 +35,7 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
     cluster = falses(size(model.lattice))
     seed = CartesianIndex(Tuple(rand(1:model.L, model.d)))
     stack = [seed]
+    sizehint!(stack, model.L^model.d)
     sval = model.lattice[seed]
     # choose a random spin out of other values
     new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
