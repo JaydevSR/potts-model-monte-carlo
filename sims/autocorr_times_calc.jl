@@ -38,7 +38,7 @@ Threads.@threads for i = 1:length(Temps)
     corrfn = autocorrelation_fn(m_arr)
     τ = sum(corrfn[1:wsteps])
     auto_corr_times_wolff[i] = τ
-    println("| Process complete on thread #$(Threads.threadid()) (T = $T): τ = $(auto_corr_times_metro[i]), $(auto_corr_times_wolff_scaled[i]) ($(auto_corr_times_wolff[i]))")
+    println("| Process complete on thread #$(Threads.threadid()) (T = $T): τ = $(auto_corr_times_wolff[i])")
 end
 
 println("| ")
