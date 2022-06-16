@@ -1,6 +1,6 @@
 include("../src/pottsmc.jl")
 
-Lvals = [16, 24, 32, 40, 48]
+Lvals = [48]
 # temps = [0.50, 0.70, 0.90, 0.94, 0.98, 1.02, 1.06, 1.10, 1.30, 1.50]
 # temps = [0.984, 0.990, 0.996, 1.000, 1.004, 1.01, 1.016]
 temps = [1.002, 1.006, 1.008, 1.024, 1.028, 1.04]
@@ -10,7 +10,7 @@ temps = [1.002, 1.006, 1.008, 1.024, 1.028, 1.04]
 q=3
 d=2
 nconfigs=5000
-eqsteps=10000
+eqsteps=5000
 store_at="data/magdata/"
 
-potts_getmagdata_to_txt(Lvals, temps, q, d, nconfigs, eqsteps, τvals; store_at=store_at, ntau=10)
+potts_getmagdata_to_txt(Lvals, temps, q, d, nconfigs, eqsteps, τvals; store_at=store_at, ntau=3, mode="w")
