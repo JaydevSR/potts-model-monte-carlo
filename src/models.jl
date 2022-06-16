@@ -60,3 +60,24 @@ function get_nearest_neighbors(model::PottsModel3D, k::CartesianIndex)
     nnbrs = [mod1.(nn, model.L) for nn in nnbrs]  # Periodic boundary conditions
     return nnbrs
 end
+
+# function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
+#     shifts = CartesianIndex.([
+#         (1, 0), (model.L - 1, 0), 
+#         (0, 1), (0, model.L - 1)
+#         ])
+#     nnbrs = [(k + δ) for δ in shifts]
+#     nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
+#     return nnbrs
+# end
+
+# function get_nearest_neighbors(model::PottsModel3D, k::CartesianIndex)
+#     shifts = CartesianIndex.([
+#         (1, 0, 0), (model.L - 1, 0, 0),
+#         (0, 1, 0), (0, model.L - 1, 0),
+#         (0, 0, 1), (0, 0, model.L - 1)
+#         ])
+#     nnbrs = [(k + δ) for δ in shifts]
+#     nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
+#     return nnbrs
+# end

@@ -9,7 +9,8 @@ function potts_getconfigdata_to_txt(
     store_at::AbstractString="",
     start::Symbol=:cold,
     verbose=true,
-    ntau=2
+    ntau=2,
+    mode=w
     )
     for L in lattice_sizes
         verbose && println(".==================================")
@@ -47,7 +48,7 @@ function potts_getconfigdata_to_txt(
             end
 
             filename="potts_uncorr_configs_temp$(temps[stepT])_L$(L).txt"
-            open(joinpath([szpath, filename]), "w") do io
+            open(joinpath([szpath, filename]), mode) do io
                 writedlm(io, uncorrelated_spins, ',')
             end;
             verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
@@ -69,7 +70,8 @@ function potts_getmagdata_to_txt(
     store_at::AbstractString="",
     start::Symbol=:cold,
     verbose=true,
-    ntau=2
+    ntau=2,
+    mode="w"
     )
     for L in lattice_sizes
         verbose && println(".==================================")
@@ -107,7 +109,7 @@ function potts_getmagdata_to_txt(
             end
 
             filename="potts_mags_temp$(temps[stepT])_L$(L).txt"
-            open(joinpath([szpath, filename]), "w") do io
+            open(joinpath([szpath, filename]), mode) do io
                 writedlm(io, mags, ',')
             end;
             verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
