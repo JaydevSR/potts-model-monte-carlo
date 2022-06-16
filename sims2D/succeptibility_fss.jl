@@ -6,12 +6,13 @@ temps = [0.50, 0.70, 0.90, 0.94, 0.98, 1.02, 1.06, 1.10, 1.30, 1.50]
 basepath = joinpath(["data", "magdata"])
 err_nblocks = 25
 
-f = Figure()
+f1 = Figure()
+f2 = Figure()
 
-ax1 = Axis(f[1, 1], xlabel = "temperature, T", ylabel = "magnetisation (per site), m",
+ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetisation (per site), m",
     title = "PottsModel2D: Magnetisation (per site) v/s temperature")
 
-ax2 = Axis(f[2, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
+ax2 = Axis(f2[1, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D: Succeptibility (per site) v/s temperature")
 
 for L in Lvals
@@ -43,5 +44,6 @@ end
 
 axislegend(ax1)
 axislegend(ax2)
-display(f)
+display(f1)
+display(f2)
 
