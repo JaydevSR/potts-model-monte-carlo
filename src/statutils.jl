@@ -59,6 +59,9 @@ function blocking_err(samples, calc_qty, args...; blocks = 20)
     return err
 end
 
+"""
+Calculate the k'th cumulant of given samples.
+"""
 function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
     cmoms = zeros(Float64, last(k))
     cumls = zeros(Float64, last(k))
@@ -68,7 +71,7 @@ function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
         cmoms[i] =  moment(samples, i)
         kn = cmoms[i]
         for j=2:i-2
-            kn -= binomial(i-1, j)*cmoms[j]*cumls[m-j]
+            kn -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
         end
         cumls[i] = kn
     end
@@ -77,3 +80,14 @@ end
 
 cumulant(samples::Array{<:Real}, k::Int, m::Real) = cumulant(samples, 1:k, m)[k]
 cumulant(samples::Array{<:Real}, k::Union{Int, UnitRange{Int}}) = cumulant(samples, k, mean(samples))
+
+"""
+Calculate Binder's cumulant for given array of magnetisation (per spin).
+"""
+function binders_cumulant(marr)
+    m4 = m2 = 0
+    for m in marr
+        m4, m2 = m4 + m^4, m2 + m^2
+    end
+    return 1 - (m4 / (3*m2*m2))
+end
