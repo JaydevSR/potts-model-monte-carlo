@@ -6,7 +6,7 @@ mutable struct PottsModel2D{T<:Integer} <: AbstractPottsModel
     L::T
     q::T
     d::T
-    lattice::AbstractArray{T, 2}
+    lattice::Array{T, 2}
     function PottsModel2D{T}(L::T, q::T, start::Symbol) where T<:Integer
         if start==:cold
             lattice=fill(zero(T), (L, L))
@@ -25,7 +25,7 @@ mutable struct PottsModel3D{T<:Integer} <: AbstractPottsModel
     L::T
     q::T
     d::T
-    lattice::AbstractArray{T, 3}
+    lattice::Array{T, 3}
     function PottsModel3D{T}(L::T, q::T, start::Symbol) where T<:Integer
         if start==:cold
             lattice=fill(zero(T), (L, L, L))
@@ -40,44 +40,23 @@ end
 
 PottsModel3D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel3D{T}(L, q, start)
 
-function get_nearest_neighbors(model::PottsModel2D, k::Array)
-    shifts = [
-        [1, 0], [model.L - 1, 0], 
-        [0, 1], [0, model.L - 1]
-        ]
-    nnbrs = [k + δ for δ in shifts]
-    nnbrs = [mod1.(nn, model.L) for nn in nnbrs]  # Periodic boundary conditions
+function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
+    shifts = CartesianIndex.([
+        (1, 0), (model.L - 1, 0), 
+        (0, 1), (0, model.L - 1)
+        ])
+    nnbrs = [(k + δ) for δ in shifts]
+    nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
     return nnbrs
 end
 
 function get_nearest_neighbors(model::PottsModel3D, k::CartesianIndex)
-    shifts = [
-        [1, 0, 0], [model.L - 1, 0, 0],
-        [0, 1, 0], [0, model.L - 1, 0],
-        [0, 0, 1], [0, 0, model.L - 1]
-        ]
-    nnbrs = [k + δ for δ in shifts]
-    nnbrs = [mod1.(nn, model.L) for nn in nnbrs]  # Periodic boundary conditions
+    shifts = CartesianIndex.([
+        (1, 0, 0), (model.L - 1, 0, 0),
+        (0, 1, 0), (0, model.L - 1, 0),
+        (0, 0, 1), (0, 0, model.L - 1)
+        ])
+    nnbrs = [(k + δ) for δ in shifts]
+    nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
     return nnbrs
 end
-
-# function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
-#     shifts = CartesianIndex.([
-#         (1, 0), (model.L - 1, 0), 
-#         (0, 1), (0, model.L - 1)
-#         ])
-#     nnbrs = [(k + δ) for δ in shifts]
-#     nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
-#     return nnbrs
-# end
-
-# function get_nearest_neighbors(model::PottsModel3D, k::CartesianIndex)
-#     shifts = CartesianIndex.([
-#         (1, 0, 0), (model.L - 1, 0, 0),
-#         (0, 1, 0), (0, model.L - 1, 0),
-#         (0, 0, 1), (0, 0, model.L - 1)
-#         ])
-#     nnbrs = [(k + δ) for δ in shifts]
-#     nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
-#     return nnbrs
-# end

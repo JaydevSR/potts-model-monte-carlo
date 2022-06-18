@@ -29,56 +29,30 @@ function δE_single_flip(model::AbstractPottsModel, flip_site::CartesianIndex, f
 end
 
 # WOLFF CLUSTER ALGORITHM
-
 function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
     P_add = 1 - exp(-1/temp)
+    stack = []
+    sizehint!(stack, model.L^model.d)
     cluster = falses(size(model.lattice))
-    seed = rand(1:model.L, model.d)
-
-    # initialize static stack
-    ptrcol=[1]
-    stack = zeros(Int64, (model.d, model.L^model.d))
-    stack[:, ptrcol] = seed
-    cluster[seed...] = true
-
+    seed = CartesianIndex(Tuple(rand(1:model.L, model.d)))
+    @inbounds sval = model.lattice[seed]
+    push!(stack, seed)
+    
     # choose a random spin out of other values
-    sval = model.lattice[seed...]
     new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
-    while ptrcol[] > 0
-        k, ptrcol[] = stack[:, ptrcol], ptrcol[]-1  # pop
-        kval = model.lattice[k...]
-        model.lattice[k...] = new_val  # set new value
+    @inbounds cluster[seed] = true
+    while !isempty(stack)
+        k = pop!(stack)
+        @inbounds kval = model.lattice[k]
+        @inbounds model.lattice[k] = new_val  # set new value
         nnbrs = get_nearest_neighbors(model, k)
         for nn ∈ nnbrs
-            nnval = model.lattice[nn...]
-            if kval == nnval && !cluster[nn...] && rand() < P_add
-                stack[:, ptrcol[]+1], ptrcol[] = nn, ptrcol[]+1  # push
-                cluster[nn...] = true
+            @inbounds nnval = model.lattice[nn]
+            if kval == nnval && !cluster[nn] && rand() < P_add
+                push!(stack, nn)
+                @inbounds cluster[nn] = true
             end
         end
     end
+    nothing
 end
-
-# function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
-#     P_add = 1 - exp(-1/temp)
-#     cluster = falses(size(model.lattice))
-#     seed = CartesianIndex(Tuple(rand(1:model.L, model.d)))
-#     stack = [seed]
-#     sval = model.lattice[seed]
-#     # choose a random spin out of other values
-#     new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
-#     cluster[seed] = true
-#     while !isempty(stack)
-#         k = pop!(stack)
-#         kval = model.lattice[k]
-#         model.lattice[k] = new_val  # set new value
-#         nnbrs = get_nearest_neighbors(model, k)
-#         for nn ∈ nnbrs
-#             nnval = model.lattice[nn]
-#             if kval == nnval && !cluster[nn] && rand() < P_add
-#                 push!(stack, nn)
-#                 cluster[nn] = true
-#             end
-#         end
-#     end
-# end
