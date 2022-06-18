@@ -2,61 +2,58 @@
 
 abstract type AbstractPottsModel end
 
-mutable struct PottsModel2D{T<:Integer} <: AbstractPottsModel
+mutable struct PottsModel2D{T<:Integer, N, C} <: AbstractPottsModel
     L::T
     q::T
     d::T
     lattice::Array{T, 2}
-    function PottsModel2D{T}(L::T, q::T, start::Symbol) where T<:Integer
-        if start==:cold
-            lattice=fill(zero(T), (L, L))
-        elseif start==:hot
-            lattice=rand(zero(T):zero(T)+q-1, (L, L))
-        else
-            error("Start state can be one of symbols :$(:cold) or :$(:hot)")
-        end
-        new{T}(L, q, 2, lattice)
-    end
+    shifts::SVector{N, C}
 end
 
-PottsModel2D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel2D{T}(L, q, start)
+function PottsModel2D(L::T, q::T, start::Symbol=:cold) where T <: Integer
+    if start==:cold
+        lattice=fill(zero(T), (L, L))
+    elseif start==:hot
+        lattice=rand(zero(T):zero(T)+q-1, (L, L))
+    else
+        error("Start state can be one of symbols :$(:cold) or :$(:hot)")
+    end
+    shifts = SA[
+        CartesianIndex(1, 0), CartesianIndex(L - 1, 0), 
+        CartesianIndex(0, 1), CartesianIndex(0, L - 1)
+        ]
+    C = eltype(shifts)
+    N = length(shifts)
+    return PottsModel2D{T, N, C}(L, q, 2, lattice, shifts)
+end
 
-mutable struct PottsModel3D{T<:Integer} <: AbstractPottsModel
+mutable struct PottsModel3D{T<:Integer, N, C} <: AbstractPottsModel
     L::T
     q::T
     d::T
-    lattice::Array{T, 3}
-    function PottsModel3D{T}(L::T, q::T, start::Symbol) where T<:Integer
-        if start==:cold
-            lattice=fill(zero(T), (L, L, L))
-        elseif start==:hot
-            lattice=rand(zero(T):zero(T)+q-1, (L, L, L))
-        else
-            error("Start state can be one of symbols :$(:cold) or :$(:hot)")
-        end
-        new{T}(L, q, 3, lattice)
+    lattice::Array{T, 2}
+    shifts::SVector{N, C}
+end
+
+function PottsModel3D(L::T, q::T, start::Symbol=:cold) where T <: Integer
+    if start==:cold
+        lattice=fill(zero(T), (L, L, L))
+    elseif start==:hot
+        lattice=rand(zero(T):zero(T)+q-1, (L, L, L))
+    else
+        error("Start state can be one of symbols :$(:cold) or :$(:hot)")
     end
+    shifts = SA[
+        CartesianIndex(1, 0, 0), CartesianIndex(L - 1, 0, 0), 
+        CartesianIndex(0, 1, 0), CartesianIndex(0, L - 1, 0),
+        CartesianIndex(0, 0, 1), CartesianIndex(0, 0, L - 1)
+        ]
+    C = eltype(shifts)
+    N = length(shifts)
+    return PottsModel3D{T, N, C}(L, q, 2, lattice, shifts)
 end
 
-PottsModel3D(L::T, q::T, start::Symbol=:cold) where {T<:Integer} = PottsModel3D{T}(L, q, start)
-
-function get_nearest_neighbors(model::PottsModel2D, k::CartesianIndex)
-    shifts = CartesianIndex.([
-        (1, 0), (model.L - 1, 0), 
-        (0, 1), (0, model.L - 1)
-        ])
-    nnbrs = [(k + δ) for δ in shifts]
-    nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
-    return nnbrs
-end
-
-function get_nearest_neighbors(model::PottsModel3D, k::CartesianIndex)
-    shifts = CartesianIndex.([
-        (1, 0, 0), (model.L - 1, 0, 0),
-        (0, 1, 0), (0, model.L - 1, 0),
-        (0, 0, 1), (0, 0, model.L - 1)
-        ])
-    nnbrs = [(k + δ) for δ in shifts]
-    nnbrs = [CartesianIndex(mod1.(Tuple(nn), model.L)) for nn in nnbrs]  # Periodic boundary conditions
+function get_nearest_neighbors(model::AbstractPottsModel, k::CartesianIndex)
+    nnbrs = SA[[CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]...]
     return nnbrs
 end
