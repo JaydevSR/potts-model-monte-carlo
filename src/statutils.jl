@@ -29,9 +29,9 @@ Estimate the error in the given samples by bootstrap method.
 Here, `calc_qty` is the function to calculate the quantity in which error has to be calculated.
 And, `r` is a keyword arguments giving number of resamples.
 """
-function bootstrap_err(samples, calc_qty, args...; r = 100)
+function bootstrap_err(samples, calc_qty, args...; r = 200)
     nob = length(samples)
-    resample_arr = zeros(Float64, nob)
+    resample_arr = zeros(Float64, r)
     for i = 1:r
         resample = rand(samples, nob)
         resample_arr[i] = calc_qty(resample, args...)
