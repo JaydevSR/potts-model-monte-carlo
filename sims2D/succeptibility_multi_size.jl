@@ -16,6 +16,7 @@ ax2 = Axis(f2[1, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D: Succeptibility (per site) v/s temperature")
 
 T_star_arr = []
+max_val = []
 
 for L in Lvals
     mags = zeros(Float64, length(temps))  # Array of magnetisation per site
@@ -43,10 +44,11 @@ for L in Lvals
     errorbars!(ax2, temps, suzzs, err_suzzs, whiskerwidth = 10)
     scatterlines!(ax2, temps, suzzs, markersize = 7, label="Size=$(L)x$(L)", linestyle = :dot, color=cols[L])
     push!(T_star_arr, temps[argmax(suzzs)])
+    push!(max_val, maximum(suzzs))
 end
 
 open("data/max_arg_suzz.txt", "w") do io
-    writedlm(io, [Lvals T_star_arr], ',')
+    writedlm(io, [Lvals T_star_arr max_val], ',')
 end
 
 axislegend(ax1)

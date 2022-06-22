@@ -2,10 +2,10 @@ include("../src/pottsmc.jl")
 
 data = readdlm("data/max_arg_suzz.txt", ',', Float64)
 
+ν = 5/6
 Lvals = data[:, 1]
 L_ν = Lvals.^-(1/ν)
 T_star = data[:, 2]
-ν = 5/6
 
 f = Figure()
 ax = Axis(f[1, 1], xlabel = "L^-1/ν", ylabel = "T_c(L)",
