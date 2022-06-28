@@ -20,38 +20,40 @@ function potts_getconfigdata_to_txt(
 
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
-        Threads.@threads for stepT in 1:length(temps)
-            T = temps[stepT]
-            verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
-            
-            if d==2
-                potts = PottsModel2D(L, q, start)
-            elseif d==3
-                potts = PottsModel3D(L, q, start)
-            else
-                error("No model available for d=$d.")
-            end
-
-            for i=1:eqsteps  # equilibration
-                wolff_cluster_update!(potts, T)
-            end
-
-            uncorrelated_spins = zeros(Int64, (potts.L^potts.d, nconfigs))
-
-            nτ = ntau*autocorr_times[stepT]
-            numsteps = nτ*nconfigs
-            el = @elapsed for j in 1:numsteps
-                wolff_cluster_update!(potts, T)
-                if j%nτ == 0
-                    uncorrelated_spins[:, j÷nτ] = reshape(potts.lattice, potts.L^potts.d)
+        @sync for stepT in 1:length(temps)
+            Threads.@spawn begin
+                T = temps[stepT]
+                verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
+                
+                if d==2
+                    potts = PottsModel2D(L, q, start)
+                elseif d==3
+                    potts = PottsModel3D(L, q, start)
+                else
+                    error("No model available for d=$d.")
                 end
-            end
 
-            filename="potts_uncorr_configs_temp$(temps[stepT])_L$(L).txt"
-            open(joinpath([szpath, filename]), mode) do io
-                writedlm(io, uncorrelated_spins, ',')
-            end;
-            verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
+                for i=1:eqsteps  # equilibration
+                    wolff_cluster_update!(potts, T)
+                end
+
+                uncorrelated_spins = zeros(Int64, (potts.L^potts.d, nconfigs))
+
+                nτ = ntau*autocorr_times[stepT]
+                numsteps = nτ*nconfigs
+                el = @elapsed for j in 1:numsteps
+                    wolff_cluster_update!(potts, T)
+                    if j%nτ == 0
+                        uncorrelated_spins[:, j÷nτ] = reshape(potts.lattice, potts.L^potts.d)
+                    end
+                end
+
+                filename="potts_uncorr_configs_temp$(temps[stepT])_L$(L).txt"
+                open(joinpath([szpath, filename]), mode) do io
+                    writedlm(io, uncorrelated_spins, ',')
+                end;
+                verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
+            end
         end
         verbose && println("| Done.")
         verbose && println(".==================================")
@@ -81,38 +83,40 @@ function potts_getmagdata_to_txt(
 
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
-        Threads.@threads for stepT in 1:length(temps)
-            T = temps[stepT]
-            verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T))")
-            
-            if d==2
-                potts = PottsModel2D(L, q, start)
-            elseif d==3
-                potts = PottsModel3D(L, q, start)
-            else
-                error("No model available for d=$d.")
-            end
-
-            for i=1:eqsteps  # equilibration
-                wolff_cluster_update!(potts, T)
-            end
-
-            mags = zeros(Float64, nconfigs)
-
-            nτ = ntau*autocorr_times[stepT]
-            numsteps = nτ*nconfigs
-            el = @elapsed for j in 1:numsteps
-                wolff_cluster_update!(potts, T)
-                if j%nτ == 0
-                    mags[j÷nτ] = round(magnetisation(potts), digits=3)
+        @sync for stepT in 1:length(temps)
+            Threads.@spawn begin
+                T = temps[stepT]
+                verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T))")
+                
+                if d==2
+                    potts = PottsModel2D(L, q, start)
+                elseif d==3
+                    potts = PottsModel3D(L, q, start)
+                else
+                    error("No model available for d=$d.")
                 end
+    
+                for i=1:eqsteps  # equilibration
+                    wolff_cluster_update!(potts, T)
+                end
+    
+                mags = zeros(Float64, nconfigs)
+    
+                nτ = ntau*autocorr_times[stepT]
+                numsteps = nτ*nconfigs
+                el = @elapsed for j in 1:numsteps
+                    wolff_cluster_update!(potts, T)
+                    if j%nτ == 0
+                        mags[j÷nτ] = round(magnetisation(potts), digits=3)
+                    end
+                end
+    
+                filename="potts_mags_temp$(temps[stepT])_L$(L).txt"
+                open(joinpath([szpath, filename]), mode) do io
+                    writedlm(io, mags, ',')
+                end;
+                verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.") 
             end
-
-            filename="potts_mags_temp$(temps[stepT])_L$(L).txt"
-            open(joinpath([szpath, filename]), mode) do io
-                writedlm(io, mags, ',')
-            end;
-            verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
         end
         verbose && println("| Done.")
         verbose && println(".==================================")
