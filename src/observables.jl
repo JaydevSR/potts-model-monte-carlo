@@ -27,5 +27,5 @@ function magnetisation(model::AbstractPottsModel)
     for site in CartesianIndices(model.lattice)
         counts[model.lattice[site] + 1] += 1
     end
-    return (model.q/(model.q - 1)) * maximum(counts .- model.L^model.d / model.q)
+    return Float64((model.q // (model.q - 1)) * maximum(counts .- model.L^model.d // model.q))
 end
