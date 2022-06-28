@@ -4,7 +4,7 @@ Lvals = [16, 24, 32, 40, 48]
 cols = Dict([(16, :blue), (24, :red), (32, :green), (40, :purple), (48, :black)])
 temps = [0.90, 0.94, 0.98, 0.984, 0.990, 0.996, 1.000, 1.002, 1.004, 1.006, 1.008, 1.01, 1.012, 1.014, 1.016, 1.018, 1.02, 1.022, 1.024, 1.026, 1.028, 1.03, 1.04, 1.06, 1.10]
 basepath = joinpath(["data", "magdata"])
-err_nblocks = 20
+bootstrap_samples = 100
 
 f1 = Figure()
 f2 = Figure()
@@ -19,6 +19,7 @@ T_star_arr = []
 max_val = []
 
 for L in Lvals
+    println("L = ", L)
     mags = zeros(Float64, length(temps))  # Array of magnetisation per site
     err_mags = zeros(Float64, length(temps))
 
@@ -31,11 +32,12 @@ for L in Lvals
         m_arr = readdlm(loc, ',', Float64) ./ L^2
 
         mags[i] = mean(m_arr) 
-        err_mags[i] = blocking_err(m_arr, A -> mean(A); blocks=err_nblocks)
+        err_mags[i] = bootstrap_err(m_arr, A -> mean(A); r=bootstrap_samples)
 
         suzz_kth(m_arr, T, nsites, k) = (1/T) * nsites * cumulant(m_arr, k)
-        suzzs[i] = suzz_kth(m_arr, T, L*L, 2)
-        err_suzzs[i] = blocking_err(m_arr, suzz_kth, T, L*L, 2; blocks=err_nblocks)
+        order_k = 2
+        suzzs[i] = suzz_kth(m_arr, T, L*L, order_k)
+        err_suzzs[i] = bootstrap_err(m_arr, suzz_kth, T, L*L, order_k; r=bootstrap_samples)
     end
 
     errorbars!(ax1, temps, mags, err_mags, whiskerwidth = 10)
@@ -53,6 +55,5 @@ end
 
 axislegend(ax1)
 axislegend(ax2)
-display(f1)
+# display(f1)
 display(f2)
-
