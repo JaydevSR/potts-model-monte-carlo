@@ -57,3 +57,8 @@ function get_nearest_neighbors(model::AbstractPottsModel, k::CartesianIndex)
     nnbrs = SA[[CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]...]
     return nnbrs
 end
+
+function get_projection(model::AbstractPottsModel, proj_dir::Int=0)
+    cos_dict = Dict([i, cos(2 * π * mod(i - proj_dir, model.q) / model.q)] for i=0:model.q-1)
+    return map(s -> cos_dict[s], model.lattice)
+end
