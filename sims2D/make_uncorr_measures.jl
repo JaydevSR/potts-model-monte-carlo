@@ -1,21 +1,13 @@
 include("../src/pottsmc.jl")
 
-Lvals = [16]#, 24, 32, 40, 48]
-# temps = [0.50, 0.70, 0.90, 0.94, 0.98, 1.02, 1.06, 1.10, 1.30, 1.50]
-# τvals = [   2,    3,    4,    5,   13,   23,   14,   14,   40,   61]
-# temps = [0.984, 0.990, 0.996, 1.000, 1.004, 1.01, 1.016]
-# τvals = [   15,    17,    20,    30,    26,   25,    23]
-# temps = [1.002, 1.006, 1.008, 1.024, 1.028, 1.04]
-# τvals = [  30,     26,    25,    20,    18,   16]
-# temps = [1.012, 1.014, 1.018, 1.022, 1.026, 1.03]
-# τvals = [   25,    24,    23,    22,    19,   16]
-temps = [1.02, 1.024]
-τvals = [   25,   25]
-
+Lvals = [16, 24, 32, 40]
+temps = [0.5, 0.7, 0.9, 0.94, 0.98, 0.984, 0.988, 0.992, 0.996, 1.0, 1.004, 1.008, 1.012, 1.016, 1.02, 1.06,  1.1, 1.3, 1.5]
+τvals = [  2,   3,   4,    5,   13,    15,    17,    19,   20,   30,    26,    25,    25,    23,   21,   14,   14,  40,  61]
 q=3
 d=2
 nconfigs=5000
 eqsteps=10000
-store_at="data/magdata/"
+store_at="data/uncorr_configs/"
 
-potts_getmagdata_to_txt(Lvals, temps, q, d, nconfigs, eqsteps, τvals; store_at=store_at, ntau=4, mode="w")
+# potts_getmagdata_to_txt(Lvals, temps, q, d, nconfigs, eqsteps, τvals; store_at=store_at, ntau=4, mode="w")
+potts_getconfigdata_to_txt(Lvals, temps, q, d, nconfigs, eqsteps, τvals; store_at=store_at, ntau=4, mode="w")
