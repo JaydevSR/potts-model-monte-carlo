@@ -29,3 +29,11 @@ function magnetisation(model::AbstractPottsModel)
     end
     return Float64((model.q // (model.q - 1)) * maximum(counts .- model.L^model.d // model.q))
 end
+
+function magnetisation(lattice::AbstractArray, L::Int, q::Int, d::Int)
+    counts = zeros(Int64, q)
+    for site in CartesianIndices(lattice)
+        counts[lattice[site] + 1] += 1
+    end
+    return Float64((q // (q - 1)) * maximum(counts .- L^d // q))
+end

@@ -60,5 +60,10 @@ end
 
 function get_projection(model::AbstractPottsModel, proj_dir::Int=0)
     cos_dict = Dict([i, cos(2 * π * mod(i - proj_dir, model.q) / model.q)] for i=0:model.q-1)
-    return map(s -> cos_dict[s], model.lattice)
+    return Folds.map(s -> cos_dict[s], model.lattice)
+end
+
+function get_projection(lattice::AbstractArray{Int64}, q::Int64, proj_dir::Int=0)
+    cos_dict = Dict([i, cos(2 * π * mod(i - proj_dir, q) / q)] for i=0:q-1)
+    return Folds.map(s -> cos_dict[s], lattice)
 end

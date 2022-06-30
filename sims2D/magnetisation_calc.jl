@@ -1,4 +1,5 @@
 include("../src/pottsmc.jl")
+using CairoMakie
 
 #=
 Perform simulation

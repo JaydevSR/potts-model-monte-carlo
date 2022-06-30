@@ -1,4 +1,5 @@
 include("../src/pottsmc.jl")
+using CairoMakie
 
 Lvals = [16, 24, 32, 40, 48]
 cols = Dict([(16, :blue), (24, :red), (32, :green), (40, :purple), (48, :black)])
