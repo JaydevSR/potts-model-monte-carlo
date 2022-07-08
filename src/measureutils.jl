@@ -42,7 +42,8 @@ function potts_getconfigdata_to_txt(
     start::Symbol=:cold,
     ntau=2,
     mode="w",
-    verbose=true
+    verbose=true,
+    fix_vacuum=true
     )
     verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
     el = @elapsed begin
@@ -58,7 +59,7 @@ function potts_getconfigdata_to_txt(
         end
     
         for i=1:eqsteps  # equilibration
-            wolff_cluster_update!(potts, T)
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
         end
     
         uncorrelated_spins = zeros(Int64, (potts.L^potts.d, nconfigs))
@@ -66,7 +67,7 @@ function potts_getconfigdata_to_txt(
         nτ = ntau*τ
         numsteps = nτ*nconfigs
         el = @elapsed for j in 1:numsteps
-            wolff_cluster_update!(potts, T)
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
             if j%nτ == 0
                 uncorrelated_spins[:, j÷nτ] = reshape(potts.lattice, potts.L^potts.d)
             end
@@ -93,7 +94,8 @@ function potts_getmagdata_to_txt(
     start::Symbol=:cold,
     verbose=true,
     ntau=2,
-    mode="w"
+    mode="w",
+    fix_vacuum=true
     )
     for L in lattice_sizes
         verbose && println(".==================================")
@@ -117,7 +119,7 @@ function potts_getmagdata_to_txt(
                 end
     
                 for i=1:eqsteps  # equilibration
-                    wolff_cluster_update!(potts, T)
+                    wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
                 end
     
                 mags = zeros(Float64, nconfigs)
@@ -125,7 +127,7 @@ function potts_getmagdata_to_txt(
                 nτ = ntau*autocorr_times[stepT]
                 numsteps = nτ*nconfigs
                 el = @elapsed for j in 1:numsteps
-                    wolff_cluster_update!(potts, T)
+                    wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
                     if j%nτ == 0
                         mags[j÷nτ] = round(magnetisation(potts), digits=3)
                     end

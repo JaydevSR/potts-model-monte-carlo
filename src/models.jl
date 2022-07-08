@@ -54,16 +54,15 @@ function PottsModel3D(L::T, q::T, start::Symbol=:cold) where T <: Integer
 end
 
 function get_nearest_neighbors(model::AbstractPottsModel, k::CartesianIndex)
-    nnbrs = SA[[CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]...]
-    return nnbrs
+    @SVector [CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]
 end
 
 function get_projection(model::AbstractPottsModel, proj_dir::Int=0)
-    cos_dict = Dict([i, cos(2 * π * mod(i - proj_dir, model.q) / model.q)] for i=0:model.q-1)
-    return Folds.map(s -> cos_dict[s], model.lattice)
+    cos_dict = Tuple(cos(2 * π * mod(i - proj_dir, model.q) / model.q) for i=0:model.q-1)
+    return Folds.map(s -> cos_dict[s+1], model.lattice)
 end
 
 function get_projection(lattice::AbstractArray{Int64}, q::Int64, proj_dir::Int=0)
-    cos_dict = Dict([i, cos(2 * π * mod(i - proj_dir, q) / q)] for i=0:q-1)
-    return Folds.map(s -> cos_dict[s], lattice)
+    cos_vals = Tuple(cos(2 * π * mod(i - proj_dir, q) / q) for i=0:q-1)
+    return Folds.map(s -> cos_vals[s+1], lattice)
 end

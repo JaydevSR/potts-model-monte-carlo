@@ -32,8 +32,9 @@ And, `r` is a keyword arguments giving number of resamples.
 function bootstrap_err(samples, calc_qty, args...; r = 200)
     nob = length(samples)
     resample_arr = zeros(Float64, r)
+    resample = zeros(eltype(samples), nob)
     for i = 1:r
-        resample = rand(samples, nob)
+        resample .= rand(samples, nob)
         resample_arr[i] = calc_qty(resample, args...)
     end
     err = std(resample_arr, corrected = false)
@@ -69,11 +70,9 @@ function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
     cumls[1] = m
     for i=2:last(k)
         cmoms[i] =  moment(samples, i)
-        kn = cmoms[i]
         for j=2:i-2
-            kn -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
+            cmoms[i] -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
         end
-        cumls[i] = kn
     end
     return cumls[k]
 end

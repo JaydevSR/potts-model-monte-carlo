@@ -22,14 +22,14 @@ end
 
 function δE_single_flip(model::AbstractPottsModel, flip_site::CartesianIndex, flip_val::Int64)
     nnbrs = get_nearest_neighbors(model, flip_site)
-    nnbrs_vals = [model.lattice[i] for i in nnbrs]
+    nnbrs_vals = model.lattice[nnbrs]
     s1 = sum(nnbrs_vals .== model.lattice[flip_site])
     s2 = sum(nnbrs_vals .== flip_val)
     return convert(Int64, -(s2 - s1))
 end
 
 # WOLFF CLUSTER ALGORITHM
-function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
+function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vacuum::Bool=true)
     P_add = 1 - exp(-1/temp)
     stack = []
     sizehint!(stack, model.L^model.d)
@@ -53,6 +53,12 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64)
                 @inbounds cluster[nn] = true
             end
         end
+    end
+
+    if fix_vacuum
+        current_vacuum = max(model.lattice)
+        rotation = Tuple(mod(s - current_vacuum, model.q) for s=0:model.q-1)
+        model.lattice .= Folds.map(s -> rotation[s+1], model.lattice)
     end
     nothing
 end
