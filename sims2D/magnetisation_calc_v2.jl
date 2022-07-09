@@ -23,7 +23,7 @@ println("| Lattice Size: $(L) x $(L)        ")
 println(".==================================")
 println("|  ")
 
-m_T = zeros(Float64, length(Temps))  # Array of magnetisation per site
+m_T = zeros(Float64, length(Temps))  # Array of magnetization per site
 err_m_T = zeros(Float64, length(Temps))
 
 suzz_T = zeros(Float64, length(Temps))  # Array of specific heat
@@ -44,7 +44,7 @@ Threads.@threads for i = 1:length(Temps)
     for j in 1:numsteps
         wolff_cluster_update!(potts, T)
         if j%twice_τ == 0
-            m_arr[j÷twice_τ] = magnetisation(potts) / potts.L^2
+            m_arr[j÷twice_τ] = magnetization(potts) / potts.L^2
         end
     end
 
@@ -65,8 +65,8 @@ Plots
 println("| Generating Plots ...")
 f = Figure()
 
-ax1 = Axis(f[1, 1], xlabel = "temperature, T", ylabel = "magnetisation, u",
-    title = "PottsModel2D $(L)x$(L): Magnetisation (per site) v/s temperature")
+ax1 = Axis(f[1, 1], xlabel = "temperature, T", ylabel = "magnetization, u",
+    title = "PottsModel2D $(L)x$(L): magnetization (per site) v/s temperature")
 
 ax2 = Axis(f[2, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D $(L)x$(L): Succeptibility (per site) v/s temperature")

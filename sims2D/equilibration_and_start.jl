@@ -19,10 +19,10 @@ for i=1:length(Temps)
     println("Calculating for T = $(T) ...")
 
     f = Figure(resolution = (1200, 800), title="3 state potts 2D, Lattice size = $(L)x$(L), temperature=$(T)")
-    ax1 = Axis(f[1, 1:2], xlabel="step", ylabel="magnetisation", title="metropolis", xticks=LinearTicks(10))
-    ax2 = Axis(f[1, 3], xlabel="step", ylabel="magnetisation", title="metropolis", xticks=LinearTicks(10))
-    ax3 = Axis(f[2, 1:2], xlabel="step", ylabel="magnetisation", title="wolff", xticks=LinearTicks(10))
-    ax4 = Axis(f[2, 3], xlabel="step", ylabel="magnetisation", title="wolff", xticks=LinearTicks(10))
+    ax1 = Axis(f[1, 1:2], xlabel="step", ylabel="magnetization", title="metropolis", xticks=LinearTicks(10))
+    ax2 = Axis(f[1, 3], xlabel="step", ylabel="magnetization", title="metropolis", xticks=LinearTicks(10))
+    ax3 = Axis(f[2, 1:2], xlabel="step", ylabel="magnetization", title="wolff", xticks=LinearTicks(10))
+    ax4 = Axis(f[2, 3], xlabel="step", ylabel="magnetization", title="wolff", xticks=LinearTicks(10))
 
     m_arr = zeros(Float64, nsteps)
     # metropolis_batch_update
@@ -30,7 +30,7 @@ for i=1:length(Temps)
     println("   |   | Hot start ...")
     potts2d = PottsModel2D(L, q, :hot)
     for step=1:nsteps
-        m_arr[step] = magnetisation(potts2d) / potts2d.L^2
+        m_arr[step] = magnetization(potts2d) / potts2d.L^2
         metropolis_batch_update!(potts2d, T)
     end
     scatterlines!(ax1, m_arr, color=:red, label="hot start", markersize=3, markercolor=:red)
@@ -39,7 +39,7 @@ for i=1:length(Temps)
     println("   |   | Cold start ...")
     potts2d = PottsModel2D(L, q, :cold)
     for step=1:nsteps
-        m_arr[step] = magnetisation(potts2d) / potts2d.L^2
+        m_arr[step] = magnetization(potts2d) / potts2d.L^2
         metropolis_batch_update!(potts2d, T)
     end
     scatterlines!(ax1, m_arr, color=:blue, label="cold start", markersize=3, markercolor=:blue)
@@ -51,7 +51,7 @@ for i=1:length(Temps)
     println("   |   | Hot start ...")
     potts2d = PottsModel2D(L, q, :hot)
     for step=1:nsteps
-        m_arr[step] = magnetisation(potts2d) / potts2d.L^2
+        m_arr[step] = magnetization(potts2d) / potts2d.L^2
         wolff_cluster_update!(potts2d, T)
     end
     scatterlines!(ax3, m_arr, color=:red, label="hot start", markersize=3, markercolor=:red)
@@ -60,7 +60,7 @@ for i=1:length(Temps)
     println("   |   | Cold start ...")
     potts2d = PottsModel2D(L, q, :cold)
     for step=1:nsteps
-        m_arr[step] = magnetisation(potts2d) / potts2d.L^2
+        m_arr[step] = magnetization(potts2d) / potts2d.L^2
         wolff_cluster_update!(potts2d, T)
     end
     scatterlines!(ax3, m_arr, color=:blue, label="cold start", markersize=3, markercolor=:blue)

@@ -10,15 +10,15 @@ bootstrap_samples = 100
 f1 = Figure()
 f2 = Figure()
 
-ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetisation (per site), m",
-    title = "PottsModel2D: Magnetisation (per site) v/s temperature")
+ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetization (per site), m",
+    title = "PottsModel2D: magnetization (per site) v/s temperature")
 
 ax2 = Axis(f2[1, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D: Succeptibility (per site) v/s temperature")
 
 for L in Lvals
     println("L = ", L)
-    mags = zeros(Float64, length(temps))  # Array of magnetisation per site
+    mags = zeros(Float64, length(temps))  # Array of magnetization per site
     err_mags = zeros(Float64, length(temps))
 
     suzzs = zeros(Float64, length(temps))  # Array of specific heat
@@ -31,7 +31,7 @@ for L in Lvals
         uncorr_configs = readdlm(loc, ',', Int64)
         m_arr = zeros(size(uncorr_configs)[2])
         Threads.@threads for col in 1:size(uncorr_configs)[2]
-            m_arr[col] = magnetisation(uncorr_configs[:, col], L, 3, 2) / L^2
+            m_arr[col] = magnetization(uncorr_configs[:, col], L, 3, 2) / L^2
         end
 
         mags[i] = mean(m_arr) 

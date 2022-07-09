@@ -26,7 +26,7 @@ for step=1:nsteps
     if step%5000==0
         println("   |   | $(step / nsteps * 100) %")
     end
-    m_arr[step] = magnetisation(potts) / potts.L^2
+    m_arr[step] = magnetization(potts) / potts.L^2
     wolff_cluster_update!(potts, T)
 end
 
@@ -40,7 +40,7 @@ for step=1:nsteps
     if step%5000==0
         println("   |   | $(step / nsteps * 100) %")
     end
-    m_arr[step] = magnetisation(potts) / potts.L^2
+    m_arr[step] = magnetization(potts) / potts.L^2
     metropolis_batch_update!(potts, T)
 end
 

@@ -15,7 +15,7 @@ Temps = [0.5, 0.7, 0.9, 0.94, 0.98, 1.02, 1.06, 1.1, 1.3, 1.5]
 esteps = 1000  # Number of steps for equilibration
 nsteps = 10000  # Number of steps for measurements
 
-m_T = zeros(Float64, length(Temps))  # Array of magnetisation per site
+m_T = zeros(Float64, length(Temps))  # Array of magnetization per site
 err_m_T = zeros(Float64, length(Temps))
 
 χ_T = zeros(Float64, length(Temps))  # Array of specific heat
@@ -35,12 +35,12 @@ for i = 1:length(Temps)
         wolff_cluster_update!(potts, T)
     end
 
-    m_arr[1] = magnetisation(potts) / potts.L^2
+    m_arr[1] = magnetization(potts) / potts.L^2
     for step=2:nsteps
         # metropolis_batch_update!(potts, T)
         wolff_cluster_update!(potts, T)
 
-        m_arr[step] = magnetisation(potts) / potts.L^2
+        m_arr[step] = magnetization(potts) / potts.L^2
     end
 
     println("   | Calculating observables ...")
@@ -60,8 +60,8 @@ Plots
 println("Generating Plots ...")
 f = Figure()
 
-ax1 = Axis(f[1, 1], xlabel = "temperature, T", ylabel = "magnetisation, u",
-    title = "PottsModel2D $(L)x$(L): Magnetisation (per site) v/s temperature")
+ax1 = Axis(f[1, 1], xlabel = "temperature, T", ylabel = "magnetization, u",
+    title = "PottsModel2D $(L)x$(L): magnetization (per site) v/s temperature")
 
 ax2 = Axis(f[2, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D $(L)x$(L): Succeptibility (per site) v/s temperature")

@@ -10,15 +10,15 @@ bootstrap_samples = 100
 f1 = Figure()
 f2 = Figure()
 
-ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetisation (per site), m",
-    title = "PottsModel2D: Magnetisation (per site) v/s temperature")
+ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetization (per site), m",
+    title = "PottsModel2D: magnetization (per site) v/s temperature")
 
 ax2 = Axis(f2[1, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D: Succeptibility (per site) v/s temperature")
 
 for L in Lvals
     println("L = ", L)
-    mags = zeros(Float64, length(temps))  # Array of magnetisation per site
+    mags = zeros(Float64, length(temps))  # Array of magnetization per site
     err_mags = zeros(Float64, length(temps))
 
     suzzs = zeros(Float64, length(temps))  # Array of specific heat
@@ -27,8 +27,8 @@ for L in Lvals
     @floop ThreadedEx(basesize = 1) for i in eachindex(temps)
         T = temps[i]
         loc = joinpath([basepath, "Size$L", "potts_uncorr_configs_temp$(T)_L$(L).txt"])
-        mag_x_arr = get_projection(reshape(readdlm(loc, ',', Int64), :), 3, 0)
-        mags[i] = mean(mag_x_arr)
+        mag_arr = [magnetization(col, L, 3, 2) for col in eachcol(readdlm(loc, ',', Int64))]
+        mags[i] = mean(mag_arr)
         err_mags[i] = bootstrap_err(mag_x_arr, A -> mean(A); r=bootstrap_samples)
 
         suzz_kth(m_arr, T, nsites, k) = (1/T) * nsites * cumulant(m_arr, k)

@@ -129,7 +129,7 @@ function potts_getmagdata_to_txt(
                 el = @elapsed for j in 1:numsteps
                     wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
                     if j%nτ == 0
-                        mags[j÷nτ] = round(magnetisation(potts), digits=3)
+                        mags[j÷nτ] = round(magnetization(potts), digits=3)
                     end
                 end
     

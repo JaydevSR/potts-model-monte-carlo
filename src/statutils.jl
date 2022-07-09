@@ -81,7 +81,7 @@ cumulant(samples::Array{<:Real}, k::Int, m::Real) = cumulant(samples, 1:k, m)[k]
 cumulant(samples::Array{<:Real}, k::Union{Int, UnitRange{Int}}) = cumulant(samples, k, mean(samples))
 
 """
-Calculate Binder's cumulant for given array of magnetisation (per spin).
+Calculate Binder's cumulant for given array of magnetization (per spin).
 """
 function binders_cumulant(marr)
     m4 = m2 = 0

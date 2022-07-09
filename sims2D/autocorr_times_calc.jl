@@ -32,7 +32,7 @@ Threads.@threads for i = 1:length(Temps)
         wolff_cluster_update!(potts, T)
     end
     e2 = @elapsed for step=1:nsteps
-        m_arr[step] = magnetisation(potts) / potts.L^2
+        m_arr[step] = magnetization(potts) / potts.L^2
         wolff_cluster_update!(potts, T)
     end
     corrfn = autocorrelation_fn(m_arr)

@@ -10,8 +10,8 @@ bootstrap_samples = 100
 f1 = Figure()
 f2 = Figure()
 
-ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetisation (per site), m",
-    title = "PottsModel2D: Magnetisation (per site) v/s temperature")
+ax1 = Axis(f1[1, 1], xlabel = "temperature, T", ylabel = "magnetization (per site), m",
+    title = "PottsModel2D: magnetization (per site) v/s temperature")
 
 ax2 = Axis(f2[1, 1], xlabel = "temperature, T", ylabel = "succeptibility, χ",
     title = "PottsModel2D: Succeptibility (per site) v/s temperature")
@@ -21,7 +21,7 @@ max_val = []
 
 for L in Lvals
     println("L = ", L)
-    mags = zeros(Float64, length(temps))  # Array of magnetisation per site
+    mags = zeros(Float64, length(temps))  # Array of magnetization per site
     err_mags = zeros(Float64, length(temps))
 
     suzzs = zeros(Float64, length(temps))  # Array of specific heat

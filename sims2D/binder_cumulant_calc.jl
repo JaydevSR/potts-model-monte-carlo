@@ -13,7 +13,7 @@ ax1 = Axis(f1[1, 1], xlabel = "T", ylabel = "U",
     title = "PottsModel2D: Binder's cumulant v/s temperature")
 
 for L in Lvals
-    binder = zeros(Float64, length(temps))  # Array of magnetisation per site
+    binder = zeros(Float64, length(temps))  # Array of magnetization per site
 
     for i in eachindex(temps)
         T = temps[i]
