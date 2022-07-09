@@ -54,7 +54,7 @@ function PottsModel3D(L::T, q::T, start::Symbol=:cold) where T <: Integer
 end
 
 function get_nearest_neighbors(model::AbstractPottsModel, k::CartesianIndex)
-    @SVector [CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]
+    SA[[CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]...]
 end
 
 function get_projection(model::AbstractPottsModel, proj_dir::Int=0)
