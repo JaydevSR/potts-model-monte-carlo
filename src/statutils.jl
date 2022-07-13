@@ -69,10 +69,12 @@ function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
     cmoms[1] = 0
     cumls[1] = m
     for i=2:last(k)
-        cmoms[i] =  moment(samples, i)
+        @inbounds cmoms[i] =  moment(samples, i, m)
+        @inbounds kn = cmoms[i]
         for j=2:i-2
-            cmoms[i] -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
+            @inbounds kn -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
         end
+        @inbounds cumls[i] = kn
     end
     return cumls[k]
 end

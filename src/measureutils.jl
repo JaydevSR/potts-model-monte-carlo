@@ -10,7 +10,8 @@ function potts_getconfigdata_to_txt(
     start::Symbol=:cold,
     verbose=true,
     ntau=2,
-    mode="w"
+    mode="w",
+    fix_vacuum=true
     )
     for L in lattice_sizes
         verbose && println(".==================================")
@@ -21,7 +22,8 @@ function potts_getconfigdata_to_txt(
             Threads.@spawn potts_getconfigdata_to_txt(
                 L, temps[stepT], q, d, 
                 nconfigs, eqsteps, autocorr_times[stepT];
-                store_at=store_at, start=start, ntau=ntau, mode=mode
+                store_at=store_at, start=start, ntau=ntau,
+                mode=mode, fix_vacuum=fix_vacuum
                 )
         end
         verbose && println("| Done.")
@@ -106,42 +108,67 @@ function potts_getmagdata_to_txt(
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
         @sync for stepT in 1:length(temps)
-            Threads.@spawn begin
-                T = temps[stepT]
-                verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T))")
-                
-                if d==2
-                    potts = PottsModel2D(L, q, start)
-                elseif d==3
-                    potts = PottsModel3D(L, q, start)
-                else
-                    error("No model available for d=$d.")
-                end
-    
-                for i=1:eqsteps  # equilibration
-                    wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
-                end
-    
-                mags = zeros(Float64, nconfigs)
-    
-                nτ = ntau*autocorr_times[stepT]
-                numsteps = nτ*nconfigs
-                el = @elapsed for j in 1:numsteps
-                    wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
-                    if j%nτ == 0
-                        mags[j÷nτ] = round(magnetization(potts), digits=3)
-                    end
-                end
-    
-                filename="potts_mags_temp$(temps[stepT])_L$(L).txt"
-                open(joinpath([szpath, filename]), mode) do io
-                    writedlm(io, mags, ',')
-                end;
-                verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.") 
-            end
+            Threads.@spawn potts_getmagdata_to_txt(
+                L, temps[stepT], q, d, 
+                nconfigs, eqsteps, autocorr_times[stepT];
+                store_at=store_at, start=start, ntau=ntau,
+                mode=mode, fix_vacuum=fix_vacuum
+                )
         end
         verbose && println("| Done.")
         verbose && println(".==================================")
     end
     nothing
+end
+
+function potts_getmagdata_to_txt(
+    L::Int,
+    T::Float64,
+    q::Int64,
+    d::Int64,
+    nconfigs::Int64,
+    eqsteps::Int64,
+    τ::Int64=1;
+    store_at::AbstractString="",
+    start::Symbol=:cold,
+    ntau=2,
+    mode="w",
+    verbose=true,
+    fix_vacuum=true
+    )
+    verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
+    el = @elapsed begin
+        szpath = joinpath([store_at, "Size$L"])
+        ispath(szpath) ? 1 : mkpath(szpath)
+        
+        if d==2
+            potts = PottsModel2D(L, q, start)
+        elseif d==3
+            potts = PottsModel3D(L, q, start)
+        else
+            error("No model available for d=$d.")
+        end
+    
+        for i=1:eqsteps  # equilibration
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
+        end
+    
+        mags = zeros(Float64, nconfigs)
+    
+        nτ = ntau*τ
+        numsteps = nτ*nconfigs
+        el = @elapsed for j in 1:numsteps
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
+            if j%nτ == 0
+                mags[j÷nτ] = magnetization(potts)
+            end
+        end
+    
+        filename="potts_mags_temp$(T)_L$(L).txt"
+        open(joinpath([szpath, filename]), mode) do io
+            writedlm(io, mags, ',')
+        end; 
+    end
+    verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
+    nothing 
 end
