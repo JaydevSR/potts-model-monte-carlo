@@ -60,9 +60,13 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vac
     end
 
     if fix_vacuum
-        current_vacuum = maximum(model.lattice)
-        rotation = Tuple(mod(s - current_vacuum, model.q) for s=0:model.q-1)
-        model.lattice .= Folds.map(s -> rotation[s+1], model.lattice)
+        counts = zeros(Int64, model.q)
+        for site in eachindex(model.lattice)
+            @inbounds counts[model.lattice[site] + 1] += 1
+        end
+        current_vacuum = argmax(model.lattice) - 1
+        rotation = [mod(s - current_vacuum, model.q) for s=0:model.q-1]
+        map!(s -> rotation[s+1], model.lattice, model.lattice)
     end
     nothing
 end

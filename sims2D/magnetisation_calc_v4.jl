@@ -27,7 +27,7 @@ for L in Lvals
     @floop ThreadedEx(basesize = 1) for i in eachindex(temps)
         T = temps[i]
         loc = joinpath([basepath, "Size$L", "potts_uncorr_configs_temp$(T)_L$(L).txt"])
-        mag_arr = [magnetization(col, L, 3, 2)/L^2 for col in eachcol(readdlm(loc, ',', Int64))]
+        mag_arr = [abs(magnetization(col, L, 3, 2, use_definition=:vac))/L^2 for col in eachcol(readdlm(loc, ',', Int64))]
         mags[i] = mean(mag_arr)
         err_mags[i] = bootstrap_err(mag_arr, A -> mean(A); r=bootstrap_samples)
 

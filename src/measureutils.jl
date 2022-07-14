@@ -18,8 +18,8 @@ function potts_getconfigdata_to_txt(
         verbose && println("| Lattice Size: $(L) x $(L)        ")
         verbose && println(".==================================")
         verbose && println("|  ")
-        @sync for stepT in 1:length(temps)
-            Threads.@spawn potts_getconfigdata_to_txt(
+        @floop ThreadedEx(basesize = 1) for stepT in 1:length(temps)
+            potts_getconfigdata_to_txt(
                 L, temps[stepT], q, d, 
                 nconfigs, eqsteps, autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,
@@ -47,7 +47,7 @@ function potts_getconfigdata_to_txt(
     verbose=true,
     fix_vacuum=true
     )
-    verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
+    verbose && println("| Process strarted for T = $(T).")
     el = @elapsed begin
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
@@ -80,7 +80,7 @@ function potts_getconfigdata_to_txt(
             writedlm(io, uncorrelated_spins, ',')
         end; 
     end
-    verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
+    verbose && println("| Process complete for T = $T in $(round(el, digits=0)) seconds.")
     nothing
 end
 
@@ -107,8 +107,8 @@ function potts_getmagdata_to_txt(
 
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
-        @sync for stepT in 1:length(temps)
-            Threads.@spawn potts_getmagdata_to_txt(
+        @floop ThreadedEx(basesize = 1) for stepT in 1:length(temps)
+            potts_getmagdata_to_txt(
                 L, temps[stepT], q, d, 
                 nconfigs, eqsteps, autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,
@@ -136,7 +136,7 @@ function potts_getmagdata_to_txt(
     verbose=true,
     fix_vacuum=true
     )
-    verbose && println("| Process strarted on thread #$(Threads.threadid()) (T = $(T)).")
+    verbose && println("| Process strarted for T = $(T).")
     el = @elapsed begin
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
@@ -171,6 +171,6 @@ function potts_getmagdata_to_txt(
             writedlm(io, mags, ',')
         end; 
     end
-    verbose && println("| Process complete on thread #$(Threads.threadid()) (T = $T) in $el seconds.")
+    verbose && println("| Process complete for T = $T in $(round(el, digits=0)) seconds.")
     nothing 
 end
