@@ -29,10 +29,14 @@ function δE_single_flip(model::AbstractPottsModel, flip_site::CartesianIndex, f
 end
 
 # WOLFF CLUSTER ALGORITHM
-function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vacuum::Bool=true)
+function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vacuum::Bool=true, stack=nothing)
     P_add = 1 - exp(-1/temp)
-    stack = []
-    sizehint!(stack, model.L^model.d)
+    if isnothing(stack)
+        stack = []
+        sizehint!(stack, model.L^model.d)
+    else
+        empty!(stack)
+    end
     cluster = falses(size(model.lattice))
     seed = CartesianIndex(Tuple(rand(1:model.L, model.d)))
     @inbounds sval = model.lattice[seed]

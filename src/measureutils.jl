@@ -140,6 +140,8 @@ function potts_getmagdata_to_txt(
     el = @elapsed begin
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
+
+        stk = LazyStack(typeof(CartesianIndex(Tuple(rand(1:L, d)))))
         
         if d==2
             potts = PottsModel2D(L, q, start)
