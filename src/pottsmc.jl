@@ -1,9 +1,8 @@
-using StatsKit
+using StatsKit.StatsBase
 using StaticArrays
 using DelimitedFiles
 using Random
 using Folds
-using FLoops
 
 include("models.jl")
 include("mcalgos.jl")

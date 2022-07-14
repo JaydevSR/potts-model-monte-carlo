@@ -18,8 +18,8 @@ function potts_getconfigdata_to_txt(
         verbose && println("| Lattice Size: $(L) x $(L)        ")
         verbose && println(".==================================")
         verbose && println("|  ")
-        @floop ThreadedEx(basesize = 1) for stepT in 1:length(temps)
-            potts_getconfigdata_to_txt(
+        @sync for stepT in 1:length(temps)
+            Threads.@spawn potts_getconfigdata_to_txt(
                 L, temps[stepT], q, d, 
                 nconfigs, eqsteps, autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,
@@ -107,8 +107,8 @@ function potts_getmagdata_to_txt(
 
         szpath = joinpath([store_at, "Size$L"])
         ispath(szpath) ? 1 : mkpath(szpath)
-        @floop ThreadedEx(basesize = 1) for stepT in 1:length(temps)
-            potts_getmagdata_to_txt(
+        @sync for stepT in 1:length(temps)
+            Threads.@spawn potts_getmagdata_to_txt(
                 L, temps[stepT], q, d, 
                 nconfigs, eqsteps, autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,

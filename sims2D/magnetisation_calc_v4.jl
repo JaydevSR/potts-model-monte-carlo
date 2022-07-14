@@ -24,7 +24,7 @@ for L in Lvals
     suzzs = zeros(Float64, length(temps))  # Array of specific heat
     err_suzzs = zeros(Float64, length(temps))
 
-    @floop ThreadedEx(basesize = 1) for i in eachindex(temps)
+    Threads.@threads for i in eachindex(temps)
         T = temps[i]
         loc = joinpath([basepath, "Size$L", "potts_uncorr_configs_temp$(T)_L$(L).txt"])
         mag_arr = [abs(magnetization(col, L, 3, 2, use_definition=:vac))/L^2 for col in eachcol(readdlm(loc, ',', Int64))]
