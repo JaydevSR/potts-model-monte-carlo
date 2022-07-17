@@ -9,11 +9,13 @@ function metropolis_batch_update!(model::AbstractPottsModel, temp::Float64)
     ΔE = 0
     for i = 1:model.L^model.d
         k = CartesianIndex(Tuple(rand(1:model.L, model.d)))
-        kval = model.lattice[k]
+        @inbounds kval = model.lattice[k]
         flip_val = mod(rand((kval + 1):(kval + model.q - 1)), model.q)
         δE = δE_single_flip(model, k, flip_val)
         if rand() < accept_probs[δE]
-            model.lattice[k] = flip_val
+            @inbounds model.lattice[k] = flip_val
+            model.counts[flip_val+1] += 1
+            model.counts[kval+1] -= 1
             ΔE += δE 
         end
     end
@@ -22,7 +24,7 @@ end
 
 function δE_single_flip(model::AbstractPottsModel, flip_site::CartesianIndex, flip_val::Int64)
     nnbrs = get_nearest_neighbors(model, flip_site)
-    nnbrs_vals = model.lattice[nnbrs]
+    @inbounds nnbrs_vals = model.lattice[nnbrs]
     s1 = sum(nnbrs_vals .== model.lattice[flip_site])
     s2 = sum(nnbrs_vals .== flip_val)
     return convert(Int64, -(s2 - s1))
@@ -49,6 +51,8 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vac
         k = pop!(stack)
         @inbounds kval = model.lattice[k]
         @inbounds model.lattice[k] = new_val  # set new value
+        model.counts[new_val+1] += 1
+        model.counts[kval+1] -= 1
         nnbrs = get_nearest_neighbors(model, k)
         for nn ∈ nnbrs
             @inbounds nnval = model.lattice[nn]
@@ -60,13 +64,13 @@ function wolff_cluster_update!(model::AbstractPottsModel, temp::Float64; fix_vac
     end
 
     if fix_vacuum
-        counts = zeros(Int64, model.q)
-        for site in eachindex(model.lattice)
-            @inbounds counts[model.lattice[site] + 1] += 1
-        end
-        current_vacuum = argmax(counts) - 1
-        rotation = [mod(s - current_vacuum, model.q) for s=0:model.q-1]
+        current_vacuum = argmax(model.counts) - 1
+        rotation = Tuple(mod(s - current_vacuum, model.q) for s=0:model.q-1)
         map!(s -> rotation[s+1], model.lattice, model.lattice)
+        unrot_counts = copy(model.counts)
+        for i in eachindex(model.counts)
+            model.counts[rotation[i]+1] = unrot_counts[i]
+        end
     end
     nothing
 end

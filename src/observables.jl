@@ -23,17 +23,13 @@ Calculate the total magnetization for q-state potts model.
 """
 
 function magnetization(model::AbstractPottsModel; use_definition::Symbol=:max)
-    counts = zeros(Int64, model.q)
-    for site in CartesianIndices(model.lattice)
-        counts[model.lattice[site] + 1] += 1
-    end
     if use_definition == :max
-        return Float64((model.q // (model.q - 1)) * maximum(counts .- model.L^model.d // model.q))
+        return Float64((model.q // (model.q - 1)) * maximum(model.counts .- model.L^model.d // model.q))
     elseif use_definition == :vac
-        return (2/3)*(sum(counts[p+1] * cos(2*pi*p/model.q) for p=0:model.q-1) + (model.L^model.d/2))
+        return (2/3)*(sum(model.counts[p+1] * cos(2*pi*p/model.q) for p=0:model.q-1) + (model.L^model.d/2))
     elseif use_definition == :both
-        M_max = Float64((model.q // (model.q - 1)) * maximum(counts .- model.L^model.d // model.q))
-        M_vac = (2/3)*(sum(counts[p+1] * cos(2*pi*p/model.q) for p=0:model.q-1) + (model.L^model.d/2))
+        M_max = Float64((model.q // (model.q - 1)) * maximum(model.counts .- model.L^model.d // model.q))
+        M_vac = (2/3)*(sum(model.counts[p+1] * cos(2*pi*p/model.q) for p=0:model.q-1) + (model.L^model.d/2))
         return M_max, M_vac
     else
         error("Unknown magnetization definition")

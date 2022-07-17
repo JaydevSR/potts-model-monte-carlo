@@ -20,8 +20,8 @@ function potts_getconfigdata_to_txt(
         verbose && println("|  ")
         @sync for stepT in 1:length(temps)
             Threads.@spawn potts_getconfigdata_to_txt(
-                L, temps[stepT], q, d, 
-                nconfigs, eqsteps, autocorr_times[stepT];
+                L, $temps[stepT], q, d, 
+                nconfigs, eqsteps, $autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,
                 mode=mode, fix_vacuum=fix_vacuum
                 )
@@ -109,8 +109,8 @@ function potts_getmagdata_to_txt(
         ispath(szpath) ? 1 : mkpath(szpath)
         @sync for stepT in 1:length(temps)
             Threads.@spawn potts_getmagdata_to_txt(
-                L, temps[stepT], q, d, 
-                nconfigs, eqsteps, autocorr_times[stepT];
+                L, $temps[stepT], q, d, 
+                nconfigs, eqsteps, $autocorr_times[stepT];
                 store_at=store_at, start=start, ntau=ntau,
                 mode=mode, fix_vacuum=fix_vacuum
                 )
