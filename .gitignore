@@ -1,2 +1,5 @@
-data/uncorr_configs/*
-data/magdata/*
+# measurement data
+data/*
+
+# vscode settings
+.vscode/*
