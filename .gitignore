@@ -3,3 +3,6 @@ data/*
 
 # vscode settings
 .vscode/*
+
+# sysimage
+JuliaSysimage.dll

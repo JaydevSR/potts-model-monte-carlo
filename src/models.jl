@@ -8,7 +8,7 @@ mutable struct PottsModel2D{T, LL, Q, D} <: AbstractPottsModel{D}
     d::Int
     lattice::Array{T, 2}
     counts::Vector{Int}
-    shifts::SVector
+    shifts::NTuple{4, CartesianIndex{2}}
 end
 
 function PottsModel2D(L::Int, q::Int, start::Symbol=:cold)
@@ -25,10 +25,10 @@ function PottsModel2D(L::Int, q::Int, start::Symbol=:cold)
     else
         error("Start state can be one of symbols :$(:cold) or :$(:hot)")
     end
-    shifts = SA[
+    shifts = (
         CartesianIndex(1, 0), CartesianIndex(L - 1, 0), 
         CartesianIndex(0, 1), CartesianIndex(0, L - 1)
-        ]
+    )
     return PottsModel2D{Int, L, q, 2}(L, q, 2, lattice, counts, shifts)
 end
 
@@ -36,9 +36,9 @@ mutable struct PottsModel3D{T, LL, Q, D} <: AbstractPottsModel{D}
     L::Int
     q::Int
     d::Int
-    lattice::Array{T, 2}
+    lattice::Array{T, 3}
     counts::Vector{Int}
-    shifts::SVector
+    shifts::NTuple{6, CartesianIndex{3}}
 end
 
 function PottsModel3D(L::Int, q::Int, start::Symbol=:cold)
@@ -55,16 +55,17 @@ function PottsModel3D(L::Int, q::Int, start::Symbol=:cold)
     else
         error("Start state can be one of symbols :$(:cold) or :$(:hot)")
     end
-    shifts = SA[
+    shifts = (
         CartesianIndex(1, 0, 0), CartesianIndex(L - 1, 0, 0), 
         CartesianIndex(0, 1, 0), CartesianIndex(0, L - 1, 0),
         CartesianIndex(0, 0, 1), CartesianIndex(0, 0, L - 1)
-        ]
+    )
     return PottsModel3D{Int, L, q, 3}(L, q, 2, lattice, counts, shifts)
 end
 
 function get_nearest_neighbors(model::AbstractPottsModel, k::CartesianIndex)
-    SA[[CartesianIndex(mod1.((k+δ).I, model.L)) for δ in model.shifts]...]
+    ns = length(model.shifts)
+    return ntuple(i -> CartesianIndex(mod1(k[1] + model.shifts[i][1], model.L), mod1(k[2]+model.shifts[i][2], model.L)), ns)
 end
 
 function get_projection(model::AbstractPottsModel, proj_dir::Int=0)
