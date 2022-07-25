@@ -1,32 +1,28 @@
 # METROPOLIS SINGLE FLIP ALGORITHM
 
-function metropolis_batch_update!(model::PottsModel2D, temp::Float64; fix_vacuum::Bool=true)
-    @assert model.d == 2
-    accept_probs = Dict(
-        append!(
-            [(i, 1.0) for i=-4:0], 
-            [(i, exp(-i / temp)) for i=1:4]
-        ))
-    ΔE = 0
-    for i = 1:model.L^2
+@inbounds function metropolis_batch_update!(
+                        model::PottsModel2D,
+                        temp::Float64;
+                        fix_vacuum::Bool=true,
+                        accept_probs::Dict=Dict(append!([(i, 1.0) for i=-4:0], [(i, exp(-i/temp)) for i=1:4])))
+    for _ in 1:model.L^2
         kx, ky = rand(1:model.L), rand(1:model.L)
-        @inbounds kval = model.lattice[kx, ky]
+        kval = model.lattice[kx, ky]
         flip_val = mod(rand((kval + 1):(kval + model.q - 1)), model.q)
 
         # compute δE
-        s1, s2, δE = 0, 0, 0
+        s1, s2 = 0, 0
         for δ in model.shifts
             nnx, nny = mod1(kx + δ[1], model.L), mod1(ky + δ[2], model.L)
-            @inbounds nnval = model.lattice[nnx, nny]
+            nnval = model.lattice[nnx, nny]
             s1 += (nnval == kval)
             s2 += (nnval == flip_val)
         end
-        δE += convert(Int64, (s1 - s2))
+        δE = convert(Int64, (s1 - s2))
         if rand() < accept_probs[δE]
-            @inbounds model.lattice[kx, ky] = flip_val
+            model.lattice[kx, ky] = flip_val
             model.counts[flip_val+1] += 1
             model.counts[kval+1] -= 1
-            ΔE += δE 
         end
     end
 

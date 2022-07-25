@@ -1,4 +1,4 @@
-include("../src/pottsmc.jl")
+include("../../src/pottsmc.jl")
 using CairoMakie
 
 data = readdlm("data/max_arg_suzz.txt", ',', Float64)

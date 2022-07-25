@@ -1,4 +1,4 @@
-include("../src/pottsmc.jl")
+include("../../src/pottsmc.jl")
 using CairoMakie
 
 Lvals = [16, 24, 32, 40, 48]

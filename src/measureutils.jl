@@ -62,12 +62,14 @@ function potts_get_measurements_to_txt(
         else
             error("No model available for d=$d.")
         end
+        stack=LazyStack(Int)
+        cluster=falses(size(model.lattice))
 
         szpath = joinpath([store_at, "$(d)DModel", "Size$L"])
         mkpath(szpath)
     
         for i=1:eqsteps  # equilibration
-            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum, stack=stack, cluster=cluster)
         end
     
         if get_configs
@@ -83,7 +85,7 @@ function potts_get_measurements_to_txt(
         nτ = ntau*τ
         numsteps = nτ*nconfigs
         el = @elapsed for j in 1:numsteps
-            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum)
+            wolff_cluster_update!(potts, T, fix_vacuum=fix_vacuum, stack=stack, cluster=cluster)
             if j%nτ == 0
                 mags[:, j÷nτ] .= magnetization(potts, use_definition=mag_definition)
                 if get_configs

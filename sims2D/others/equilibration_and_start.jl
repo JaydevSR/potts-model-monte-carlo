@@ -1,4 +1,4 @@
-include("../src/pottsmc.jl")
+include("../../src/pottsmc.jl")
 using CairoMakie
 
 #=
