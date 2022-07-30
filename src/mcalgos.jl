@@ -63,17 +63,17 @@ function wolff_cluster_update!(
     seedx, seedy = rand(1:model.L), rand(1:model.L)
     push!(stack, seedx)
     push!(stack, seedy)
-    sval = model.lattice[seedx, seedy]
+    @inbounds sval = model.lattice[seedx, seedy]
     new_val = mod(rand((sval + 1):(sval + model.q - 1)), model.q)
-    cluster[seedx, seedy] = true
+    @inbounds cluster[seedx, seedy] = true
 
     while !isempty(stack)
         ky = pop!(stack)
         kx = pop!(stack)
         @inbounds kval = model.lattice[kx, ky]
         @inbounds model.lattice[kx, ky] = new_val  # set new value
-        model.counts[new_val+1] += 1
-        model.counts[kval+1] -= 1
+        @inbounds model.counts[new_val+1] += 1
+        @inbounds model.counts[kval+1] -= 1
         for δ ∈ model.shifts
             nnx, nny = mod1(kx + δ[1], model.L), mod1(ky + δ[2], model.L)
             @inbounds nnval = model.lattice[nnx, nny]
@@ -86,8 +86,8 @@ function wolff_cluster_update!(
     end
 
     if fix_vacuum
-        current_vacuum = argmax(model.counts) - 1
-        rotation = Tuple(mod(s - current_vacuum, model.q) for s=0:model.q-1)
+        Φ = argmax(model.counts) - 1  # current vacuum
+        rotation = ntuple(s -> mod(s-Φ-1, model.q), model.q)
         map!(s -> rotation[s+1], model.lattice, model.lattice)
         unrot_counts = copy(model.counts)
         for i in eachindex(model.counts)
