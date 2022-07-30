@@ -63,7 +63,7 @@ function potts_get_measurements_to_txt(
             error("No model available for d=$d.")
         end
         stack=LazyStack(Int)
-        cluster=falses(size(model.lattice))
+        cluster=falses(size(potts.lattice))
 
         szpath = joinpath([store_at, "$(d)DModel", "Size$L"])
         mkpath(szpath)
