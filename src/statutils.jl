@@ -92,3 +92,20 @@ function binders_cumulant(marr)
     end
     return 1 - (m4 / (3*m2*m2))
 end
+
+"""
+Calculate two-point correlation function for given lattice of spins.
+"""
+function ss_correlation_fn(sites::Matrix, L=Int64; metric=*)
+    ss_corrs = zeros(Float64, L)
+    nsamples = zeros(Float64, L)
+    for i=1:L
+        for j=1:L
+            r = abs(i-j)
+            ss_corrs[r+1] += metric(sites[i,i], sites[i,j]) 
+            ss_corrs[r+1] += metric(sites[i,i], sites[j,i])
+            nsamples[r+1] += 2
+        end
+    end
+    return ss_corrs ./ nsamples
+end
