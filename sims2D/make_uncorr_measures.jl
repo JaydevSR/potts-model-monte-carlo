@@ -13,13 +13,13 @@ temps = [0.500, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.920,
          16, 15, 14, 14, 30, 35, 40, 45, 50, 60]
 
 q, d = 3, 2
-nconfigs=5000
+nconfigs=8000
 eqsteps=10000
 store_at="data/"
 ntau=5
 start=:cold
 mag_definition=:both
-get_configs=true
+get_configs=false
 fix_vacuum=true
 verbose=true
 
