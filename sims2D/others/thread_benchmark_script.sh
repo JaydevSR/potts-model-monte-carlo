@@ -10,3 +10,5 @@ do
     # rm thread_benchmark.out
     rm -rf ./dump
 done
+
+rm -rf dump
