@@ -1,6 +1,8 @@
 # measurement data
 data/*
 
+*.txt
+
 # vscode settings
 .vscode/*
 
