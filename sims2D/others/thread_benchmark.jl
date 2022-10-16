@@ -27,7 +27,7 @@ start=:cold
 mag_definition=:both
 get_configs=false
 fix_vacuum=true
-verbose=true
+verbose=false
 
 potts_get_measurements_to_txt(
     Lvals, temps, q, d, nconfigs, eqsteps, τvals;
