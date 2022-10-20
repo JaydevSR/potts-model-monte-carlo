@@ -1,32 +1,44 @@
 include("../../src/pottsmc.jl")
 using CairoMakie
 
-Lvals = [16, 24, 32, 40, 48]
-cols = Dict([(16, :blue), (24, :red), (32, :green), (40, :purple), (48, :black)])
-temps = [0.98, 0.984, 0.990, 0.996, 1.000]
-basepath = joinpath(["data", "magdata"])
-err_nblocks = 20
+Lvals = [32, 48, 64, 80]
+cols = Dict([(32, :blue), (48, :red), (64, :green), (80, :purple)])
+temps = [0.900, 0.920, 0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
+         1.008, 1.012, 1.016, 1.020, 1.024, 1.028, 1.032, 1.036, 1.040, 1.060, 1.080, 1.100]
 
-f1 = Figure()
+mags_def = 1
 
-ax1 = Axis(f1[1, 1], xlabel = "T", ylabel = "U",
-    title = "PottsModel2D: Binder's cumulant v/s temperature")
+binder = zeros(Float64, (length(Lvals), length(temps)))
+err_binder = zeros(Float64, (length(Lvals), length(temps)))
 
-for L in Lvals
-    binder = zeros(Float64, length(temps))  # Array of magnetization per site
+for Lidx in eachindex(Lvals)
+    L = Lvals[Lidx]
+    for tidx in eachindex(temps)
+        T = temps[tidx]
+        mags = readdlm(joinpath("data", "2DModel", "Size$(L)", "mags", "potts_mags_temp$(T)_L$(L).txt"), ',', Float64)
+        mags ./= L^2
 
-    for i in eachindex(temps)
-        T = temps[i]
-        loc = joinpath([basepath, "Size$L", "potts_mags_temp$(T)_L$(L).txt"])
-        m_arr = readdlm(loc, ',', Float64) ./ L^2
-
-        binder[i] = binders_cumulant(m_arr) 
-        # err_mags[i] = blocking_err(m_arr, A -> binders_cumulant(A); blocks=err_nblocks)
+        @views binder[Lidx, tidx] = binders_cumulant(mags[mags_def, :]) 
+        @views err_binder[Lidx, tidx] = bootstrap_err(mags[mags_def, :], A -> binders_cumulant(A); r=100)
     end
+end
 
-    # errorbars!(ax1, temps, mags, err_mags, whiskerwidth = 10)
-    scatterlines!(ax1, temps, binder ,markersize = 7, label="Size=$(L)x$(L)", linestyle = :dot, color=cols[L])
+# plots
+trange = 7:10
+f = Figure(resolution=(800, 600));
+
+ax1 = Axis(f[1, 1], xlabel = "T", ylabel = "U",
+    title = "PottsModel2D: Binder's cumulant v/s temperature")
+ax2 = Axis(f[2, 1], xlabel = "T", ylabel = "U")
+
+for Lidx in eachindex(Lvals)
+    L = Lvals[Lidx]
+    errorbars!(ax1, temps[:], binder[Lidx, :], err_binder[Lidx, :], whiskerwidth = 12)
+    scatterlines!(ax1, temps[:], binder[Lidx, :], markersize = 10, label="Size=$(L)x$(L)", linestyle = :dot, color=cols[L])
+    errorbars!(ax2, temps[trange], binder[Lidx, trange], err_binder[Lidx, trange], whiskerwidth = 12)
+    scatterlines!(ax2, temps[trange], binder[Lidx, trange], markersize = 10, label="Size=$(L)x$(L)", linestyle = :dot, color=cols[L])
 end
 
 axislegend(ax1)
-display(f1)
+display(f)
+save("plots/2Dmodel/cumulants/binders_cumulant.svg", f)
