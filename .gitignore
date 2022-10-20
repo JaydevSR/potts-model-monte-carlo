@@ -8,3 +8,5 @@ data/*
 
 # sysimage
 JuliaSysimage.dll
+
+Manifest.toml

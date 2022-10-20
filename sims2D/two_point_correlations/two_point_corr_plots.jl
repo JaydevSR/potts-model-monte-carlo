@@ -1,5 +1,6 @@
 using CairoMakie
 using DelimitedFiles
+using StatsKit
 
 lattice_size = 128
 ss_corr = readdlm("data/ss_correlation_fn_size_$lattice_size.txt", ',', Float64)[:, 1]
@@ -19,10 +20,10 @@ ax2 = Axis(f2[1, 1], xlabel="r", ylabel="C(r)",
 
 scatterlines!(ax1, 0:ll-1, ss_corr)
 scatterlines!(ax2, 0:lh, ss_corr[1:lh+1])
-display(f1)
-display(f2)
-save("plots/2DModel/correlations/two_point_correlations_complete_$lattice_size.png", f1)
-save("plots/2DModel/correlations/two_point_correlations_half_$lattice_size.png", f2)
+# display(f1)
+# display(f2)
+save("plots/2DModel/correlations/two_point_correlations_complete_$lattice_size.svg", f1)
+save("plots/2DModel/correlations/two_point_correlations_half_$lattice_size.svg", f2)
 
 # EXpoenents
 
@@ -41,5 +42,5 @@ scatterlines!(ax3, XX, YY, label="log(C(r))")
 scatterlines!(ax3, XX, y_reg, color=:red, 
                 label="linear fit: slope=$(round(m_reg, digits=4)), intercept=$(round(c_reg, digits=4))")
 axislegend(ax3, position=:rt)
-display(f3)
-save("plots/2DModel/correlations/two_point_correlations_fit_$lattice_size.png", f3)
+# display(f3)
+save("plots/2DModel/correlations/two_point_correlations_fit_$lattice_size.svg", f3)

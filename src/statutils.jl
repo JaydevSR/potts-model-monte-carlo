@@ -61,35 +61,12 @@ function blocking_err(samples, calc_qty, args...; blocks = 20)
 end
 
 """
-Calculate the k'th cumulant of given samples.
-"""
-function cumulant(samples::Array{<:Real}, k::UnitRange{Int}, m::Real)
-    cmoms = zeros(Float64, last(k))
-    cumls = zeros(Float64, last(k))
-    cmoms[1] = 0
-    cumls[1] = m
-    for i=2:last(k)
-        @inbounds cmoms[i] =  moment(samples, i, m)
-        @inbounds kn = cmoms[i]
-        for j=2:i-2
-            @inbounds kn -= binomial(i-1, j)*cmoms[j]*cumls[i-j]
-        end
-        @inbounds cumls[i] = kn
-    end
-    return cumls[k]
-end
-
-cumulant(samples::Array{<:Real}, k::Int, m::Real) = cumulant(samples, 1:k, m)[k]
-cumulant(samples::Array{<:Real}, k::Union{Int, UnitRange{Int}}) = cumulant(samples, k, mean(samples))
-
-"""
 Calculate Binder's cumulant for given array of magnetization (per spin).
 """
 function binders_cumulant(marr)
-    m4 = m2 = 0
-    for m in marr
-        m4, m2 = m4 + m^4, m2 + m^2
-    end
+    n = length(marr)
+    m4 = Folds.reduce(+, (m^4 for m in marr)) / n
+    m2 = Folds.reduce(+, (m^2 for m in marr)) / n
     return 1 - (m4 / (3*m2*m2))
 end
 
@@ -109,3 +86,8 @@ function ss_correlation_fn(sites::Matrix, L=Int64; metric=*)
     end
     return ss_corrs ./ nsamples
 end
+
+"""
+Calculate the k'th order susceptibility of given samples.
+"""
+susceptibility_kth(m_arr, T, nsites, k=1) = (1/T) * (nsites) * cumulant(m_arr, k+1)
