@@ -10,3 +10,11 @@ data/*
 JuliaSysimage.dll
 
 Manifest.toml
+
+*.png
+*.jpg
+*.jpeg
+
+*.pdf
+
+*.ipynb
