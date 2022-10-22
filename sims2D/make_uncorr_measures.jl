@@ -1,6 +1,6 @@
 include("../src/pottsmc.jl")
 
-Lvals = [32, 48, 64, 80]
+lattice_sizes = [32, 48, 64, 80]
 
 # temps = [0.500, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.920,
 #          0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
@@ -30,7 +30,7 @@ fix_vacuum=true
 verbose=true
 
 potts_get_measurements_to_txt(
-    Lvals, temps, q, d, nconfigs, eqsteps, τvals;
+    lattice_sizes, temps, q, d, nconfigs, eqsteps, τvals;
     ntau=ntau, start=start,
     mag_definition=mag_definition,
     get_configs=get_configs,

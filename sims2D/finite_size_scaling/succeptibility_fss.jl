@@ -1,7 +1,7 @@
 include("../../src/pottsmc.jl")
 using CairoMakie
 
-Lvals = [32, 48, 64, 80]
+lattice_sizes = [32, 48, 64, 80]
 cols = Dict([(32, :blue), (48, :red), (64, :green), (80, :purple)])
 temps = [0.900, 0.920, 0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
          1.008, 1.012, 1.016, 1.020, 1.024, 1.028, 1.032, 1.036, 1.040, 1.060, 1.080, 1.100]
@@ -9,11 +9,11 @@ temps = [0.900, 0.920, 0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1
 mags_def = 1
 suzz_kth(m_arr, T, nsites, k) = (1/T) * (nsites) * cumulant(m_arr, k)
 
-suzz = zeros(Float64, (length(Lvals), length(temps)))
-err_suzz = zeros(Float64, (length(Lvals), length(temps)))
+suzz = zeros(Float64, (length(lattice_sizes), length(temps)))
+err_suzz = zeros(Float64, (length(lattice_sizes), length(temps)))
 
-for Lidx in eachindex(Lvals)
-    L = Lvals[Lidx]
+for Lidx in eachindex(lattice_sizes)
+    L = lattice_sizes[Lidx]
     for tidx in eachindex(temps)
         T = temps[tidx]
         mags = readdlm(joinpath("data", "2DModel", "Size$(L)", "mags", "potts_mags_temp$(T)_L$(L).txt"), ',', Float64)
@@ -23,13 +23,13 @@ for Lidx in eachindex(Lvals)
     end
 end
 
-suzz_star = zeros(Float64, length(Lvals))
-error_suzz_star = zeros(Float64, length(Lvals))
-T_star = zeros(Float64, length(Lvals))
-T_star_err = zeros(Float64, length(Lvals))
+suzz_star = zeros(Float64, length(lattice_sizes))
+error_suzz_star = zeros(Float64, length(lattice_sizes))
+T_star = zeros(Float64, length(lattice_sizes))
+T_star_err = zeros(Float64, length(lattice_sizes))
 
-for stepL in eachindex(Lvals)
-    L = Lvals[stepL]
+for stepL in eachindex(lattice_sizes)
+    L = lattice_sizes[stepL]
     ss, ts = findmax(suzz[stepL, :])
     suzz_star[stepL] = ss
     error_suzz_star[stepL] = err_suzz[stepL, ts]
@@ -38,7 +38,7 @@ for stepL in eachindex(Lvals)
 end
 
 ## Least squares fit of log-log peak susceptibility vs. L
-x_log = log.(Lvals)
+x_log = log.(lattice_sizes)
 y_log = log.(suzz_star .± error_suzz_star)
 
 # Fit a line to the data
