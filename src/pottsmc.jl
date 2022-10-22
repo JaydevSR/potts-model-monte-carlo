@@ -3,6 +3,7 @@ using StaticArrays
 using DelimitedFiles
 using Random
 using Folds
+using Measurements
 
 include("utils.jl")
 include("models.jl")

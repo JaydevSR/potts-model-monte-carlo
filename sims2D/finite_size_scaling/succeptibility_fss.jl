@@ -1,56 +1,68 @@
 include("../../src/pottsmc.jl")
 using CairoMakie
-using StatsKit
 
+Lvals = [32, 48, 64, 80]
+cols = Dict([(32, :blue), (48, :red), (64, :green), (80, :purple)])
+temps = [0.900, 0.920, 0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
+         1.008, 1.012, 1.016, 1.020, 1.024, 1.028, 1.032, 1.036, 1.040, 1.060, 1.080, 1.100]
+
+mags_def = 1
 suzz_kth(m_arr, T, nsites, k) = (1/T) * (nsites) * cumulant(m_arr, k)
 
-lattice_sizes=[16, 32, 48, 64]
-temps = [0.500, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.920,
-        0.940, 0.960, 0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
-        1.008, 1.012, 1.016, 1.020, 1.024, 1.028, 1.032, 1.036, 1.040,
-        1.060, 1.080, 1.100, 1.150, 1.200, 1.250, 1.300, 1.350, 1.400, 1.500]
+suzz = zeros(Float64, (length(Lvals), length(temps)))
+err_suzz = zeros(Float64, (length(Lvals), length(temps)))
 
-order_k = 2
-errors = zeros(Float64, (length(lattice_sizes), length(temps)))
-suzzs = zeros(Float64, (length(lattice_sizes), length(temps)))
-for stepL in eachindex(lattice_sizes)
-    L = lattice_sizes[stepL]
-    for idx in eachindex(temps)
-        T = temps[idx]
+for Lidx in eachindex(Lvals)
+    L = Lvals[Lidx]
+    for tidx in eachindex(temps)
+        T = temps[tidx]
         mags = readdlm(joinpath("data", "2DModel", "Size$(L)", "mags", "potts_mags_temp$(T)_L$(L).txt"), ',', Float64)
         mags ./= L^2
-        mags_def = 1
-        suzzs[stepL, idx] = suzz_kth(mags[mags_def, :], T, L*L, order_k)
-        errors[stepL, idx] = bootstrap_err(mags[mags_def, :], suzz_kth, T, L*L, order_k; r=200)
+        @views suzz[Lidx, tidx] = suzz_kth(mags[mags_def, :], T, L^2, 2)
+        @views err_suzz[Lidx, tidx] = bootstrap_err(mags[mags_def, :], A -> suzz_kth(A, T, L^2, 2); r=100)
     end
 end
 
-suzz_star = zeros(Float64, length(lattice_sizes))
-T_star = zeros(Float64, length(lattice_sizes))
+suzz_star = zeros(Float64, length(Lvals))
+error_suzz_star = zeros(Float64, length(Lvals))
+T_star = zeros(Float64, length(Lvals))
+T_star_err = zeros(Float64, length(Lvals))
 
-for stepL in eachindex(lattice_sizes)
-    L = lattice_sizes[stepL]
-    ss, ts = findmax(suzzs[stepL, :])
+for stepL in eachindex(Lvals)
+    L = Lvals[stepL]
+    ss, ts = findmax(suzz[stepL, :])
     suzz_star[stepL] = ss
+    error_suzz_star[stepL] = err_suzz[stepL, ts]
     T_star[stepL] = temps[ts]
+    T_star_err[stepL] = 0.5*0.5*(temps[ts+1] - temps[ts-1])
 end
 
-# linear fit
-data_all = DataFrame(X=log.(lattice_sizes), Y=log.(suzz_star))
-ols = lm(@formula(Y~X), data_all)
-c_reg, m_reg = coef(ols)
-x_reg = log.(lattice_sizes)
-y_reg = m_reg .* x_reg .+ c_reg
+## Least squares fit of log-log peak susceptibility vs. L
+x_log = log.(Lvals)
+y_log = log.(suzz_star .± error_suzz_star)
 
-##
-f = Figure();
-axes = [
-    Axis(f[1,1], xlabel="log(L)", ylabel="log(χ*)", title="Maxima of Susceptibility: χ*(L) (γ=13/5, ν=5/6, γ/ν = 1.733)"),
-]
-lines!(axes[1], x_reg, y_reg, label="Linear Fit: log(χ*(L)) = $(round(m_reg, digits=3)) * log(L) + $(round(c_reg, digits=3))",
-         color=:red, linewidth=2)
-scatter!(axes[1], log.(lattice_sizes), log.(suzz_star), label="log(χ*)", color=:black, markersize=10)
-axislegend(axes[1], position=:lt)
+# Fit a line to the data
+a0, a1 = least_squares_coefficients(x_log, Measurements.value.(y_log))
+a0_with_err, a1_with_err = least_squares_coefficients(x_log, y_log)
 
-save("plots/2Dmodel/finite_size_scaling/susceptibility_peak_fss.png", f)
-display(f)
+y_log_fit = a0_with_err .+ a1_with_err .* x_log
+y_log_fit_val = Measurements.value.(y_log_fit)
+y_log_fit_val_err = Measurements.uncertainty.(y_log_fit)
+
+## Plots
+fig = Figure(resolution = (800, 600));
+ax = Axis(fig[1, 1]; xlabel = "log(L)", ylabel = "log(χ*)", title="Scaling of peak of susceptibility with size")
+
+# Plot the fit
+lines!(ax, x_log, y_log_fit_val, color = :black, linestyle=:dot,
+    label="Fit (slope=$(a1_with_err), intercept=$(a0_with_err))")
+band!(ax, x_log, y_log_fit_val .- y_log_fit_val_err, y_log_fit_val .+ y_log_fit_val_err,
+    color = (:black, 0.2), label="Fit (slope=$(a1_with_err), intercept=$(a0_with_err))")
+
+errorbars!(ax, x_log, Measurements.value.(y_log), Measurements.uncertainty.(y_log),
+    color = :black, whiskerwidth = 15, label="Data")
+scatter!(ax, x_log, Measurements.value.(y_log), color = :red, label = "Data")
+
+axislegend(ax, merge=true, position=:lt)
+save("plots/2Dmodel/finite_size_scaling/succeptibility_peak_fss.svg", fig)
+# display(fig)
