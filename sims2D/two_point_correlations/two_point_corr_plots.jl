@@ -2,7 +2,7 @@ using CairoMakie
 using DelimitedFiles
 using StatsKit
 
-lattice_size = 128
+lattice_size = 64
 ss_corr = readdlm("data/ss_correlation_fn_size_$lattice_size.txt", ',', Float64)[:, 1]
 
 ll = length(ss_corr)
@@ -13,7 +13,7 @@ ss_corr_half = ss_corr[1:lh] + ss_corr[end:-1:lh+1] ./ 2
 f1, f2 = Figure(), Figure();
 ax1 = Axis(f1[1, 1], xlabel="r", ylabel="C(r)",
             title="Two point correlation function (periodic boundary, $lattice_size×$lattice_size)",
-            xticks=0:2:lattice_size, yticks=0:0.02:1);
+            xticks=0:4:lattice_size, yticks=0:0.02:1);
 ax2 = Axis(f2[1, 1], xlabel="r", ylabel="C(r)",
             title="Two point correlation function (periodic boundary, $lattice_size×$lattice_size)",
             xticks=0:2:ll, yticks=0:0.02:1);
