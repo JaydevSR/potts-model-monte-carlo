@@ -3,9 +3,10 @@ using CairoMakie
 
 suzz_kth(m_arr, T, nsites, k) = (1/T) * (nsites) * cumulant(m_arr, k)
 
-lattice_sizes = [16, 32, 48, 64, 80]
-temps = [0.980, 0.984, 0.988, 0.992, 0.996, 1.000, 1.004,
-    1.008, 1.012, 1.016, 1.020, 1.024, 1.028, 1.032, 1.036, 1.040]
+lattice_sizes = [32, 48, 64, 80]
+temps = [0.980, 0.982, 0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.998,
+        1.000, 1.002, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014, 1.016, 1.018, 1.020, 1.022, 1.024, 1.026,
+        1.028, 1.030, 1.032, 1.034, 1.036, 1.038, 1.040]
 max_order = 6
 errors = zeros(Float64, (length(lattice_sizes), max_order, length(temps)))
 suzzs = zeros(Float64, (length(lattice_sizes), max_order, length(temps)))
@@ -33,7 +34,7 @@ for order in 1:max_order
         for stepL in eachindex(lattice_sizes)
             L = lattice_sizes[stepL]
             errorbars!(ax, temps, suzzs[stepL, order, :], errors[stepL, order, :], whiskerwidth = 12)
-            scatterlines!(ax, temps, suzzs[stepL, order, :], markersize = 12, label="size=$(L)×$(L)", linestyle = :dashdot,
+            scatterlines!(ax, temps, suzzs[stepL, order, :], markersize = 15, label="size=$(L)×$(L)", linestyle = :dashdot,
             marker=:diamond, linewidth=3)
         end
         axislegend(ax, position=:rt)
@@ -80,16 +81,16 @@ for stepL in eachindex(lattice_sizes)
 end
 
 # save values
-for stepL in eachindex(lattice_sizes)
-    L = lattice_sizes[stepL]
-    suzzs_L = suzzs[stepL, :, :]
-    errors_L = errors[stepL, :, :]
-    mkpath(joinpath("data", "2DModel", "Size$(L)", "cumulants"))
-    open(joinpath("data", "2DModel", "Size$(L)", "cumulants", "cumulant_values.txt"), "w") do io
-        writedlm(io, suzzs_L, ',')
-    end
+# for stepL in eachindex(lattice_sizes)
+#     L = lattice_sizes[stepL]
+#     suzzs_L = suzzs[stepL, :, :]
+#     errors_L = errors[stepL, :, :]
+#     mkpath(joinpath("data", "2DModel", "Size$(L)", "cumulants"))
+#     open(joinpath("data", "2DModel", "Size$(L)", "cumulants", "cumulant_values.txt"), "w") do io
+#         writedlm(io, suzzs_L, ',')
+#     end
 
-    open(joinpath("data", "2DModel", "Size$(L)", "cumulants", "cumulant_errors.txt"), "w") do io
-        writedlm(io, errors_L, ',')
-    end
-end
+#     open(joinpath("data", "2DModel", "Size$(L)", "cumulants", "cumulant_errors.txt"), "w") do io
+#         writedlm(io, errors_L, ',')
+#     end
+# end
