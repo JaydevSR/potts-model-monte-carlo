@@ -95,4 +95,4 @@ susceptibility_kth(m_arr, T, nsites, k=1) = (1/T) * (nsites) * cumulant(m_arr, k
 """
 Implementation of Simple Least Squares (OLS) method.
 """
-least_squares_coefficients(x, y) = hcat(fill!(similar(x), 1), x) \ y
+ols_coefficients(x, y) = hcat(fill!(similar(x), 1), x) \ y
