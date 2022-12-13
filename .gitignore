@@ -1,7 +1,5 @@
 # measurement data
-data/*
-
-*.txt
+data/2DModel/*
 
 # vscode settings
 .vscode/*
