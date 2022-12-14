@@ -43,8 +43,8 @@ x_log = log.(lattice_sizes)
 y_log = log.(suzz_star .± error_suzz_star)
 
 # Fit a line to the data
-a0, a1 = ols_coefficients(x_log, Measurements.value.(y_log))
-a0_with_err, a1_with_err = least_squares_coefficients(x_log, y_log)
+a0, a1 = linear_least_squares(x_log, Measurements.value.(y_log))
+a0_with_err, a1_with_err = linear_least_squares(x_log, y_log)
 
 y_log_fit = a0_with_err .+ a1_with_err .* x_log
 y_log_fit_val = Measurements.value.(y_log_fit)

@@ -93,6 +93,6 @@ Calculate the k'th order susceptibility of given samples.
 susceptibility_kth(m_arr, T, nsites, k=1) = (1/T) * (nsites) * cumulant(m_arr, k+1)
 
 """
-Implementation of Simple Least Squares (OLS) method.
+Implementation of Simple Linear Least Squares (OLS) method.
 """
-ols_coefficients(x, y) = hcat(fill!(similar(x), 1), x) \ y
+linear_least_squares(x, y) = hcat(fill!(similar(x), 1), x) \ y
