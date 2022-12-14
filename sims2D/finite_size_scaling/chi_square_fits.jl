@@ -2,8 +2,8 @@ include("../../src/pottsmc.jl")
 using CairoMakie
 using LsqFit
 
-lattice_sizes = [32, 48, 64, 80]
-cols = Dict([(32, :blue), (48, :red), (64, :green), (80, :purple)])
+lattice_sizes = [32, 48, 56, 64, 72, 80]
+cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple)])
 temps = [0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.998,
          1.000, 1.002, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014]
 
@@ -39,14 +39,17 @@ for Lidx=eachindex(lattice_sizes)
 
     # susceptibility to gaussian fit
     suzz_model(x, p) = p[1]*exp(1).^(- p[2] * (x .- p[3]).^2)
-    p0s = [0.5, 1, 1]
-    wt = inv.(err_suzz[Lidx, :].^2)
+    p0s = [0.5, 1.0, 1.0]
+    wt = 1 ./ err_suzz[Lidx, :].^2
 
+    errorbars!(axs, temps, suzz[Lidx, :], err_suzz[Lidx, :], color=cols[L], label="L = $L", whiskerwidth=12)
     scatter!(axs, temps, suzz[Lidx, :], color=cols[L], label="L = $L")
 
     gaussian_fit = curve_fit(suzz_model, temps, suzz[Lidx, :], p0s)
-    # chi_sq = sum(gaussian_fit.resid.^2 .* wt)
-    # println(chi_sq)
+    # residual_sum = sum((suzz[Lidx, :] .- suzz_model(temps, gaussian_fit.param)).^2 ./ err_suzz[Lidx, :].^2)
+    # chi_sq = residual_sum / (length(temps) - length(p0s))
+    println("L=$L: ", sum(gaussian_fit.resid.^2))
+    # println("L=$L: χ^2 = $chi_sq")
     par = gaussian_fit.param
     parerr = stderror(gaussian_fit)
     println(dfl, "Size $L :")
