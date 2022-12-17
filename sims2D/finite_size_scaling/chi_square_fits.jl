@@ -2,8 +2,8 @@ include("../../src/pottsmc.jl")
 using CairoMakie
 using LsqFit
 
-lattice_sizes = [32, 48, 56, 64, 72, 80]
-cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple)])
+lattice_sizes = [32, 48, 56, 64, 72, 80, 96]
+cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple), (96, :cyan), (128, :deepskyblue)])
 temps = [0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.998,
          1.000, 1.002, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014]
 
