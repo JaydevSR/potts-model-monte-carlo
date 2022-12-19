@@ -2,68 +2,46 @@ include("../../src/pottsmc.jl")
 using CairoMakie
 using LsqFit
 
-lattice_sizes = [32, 48, 64, 80]
+lattice_sizes = [48, 56, 64, 72, 80, 96]
 cols = Dict([(32, :blue), (48, :red), (64, :green), (80, :purple)])
-temps = [0.900, 0.920, 0.940, 0.960, 0.980, 0.982, 0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.997, 0.998,
-         0.999, 1.000, 1.001, 1.002, 1.003, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014, 1.016, 1.018, 1.020, 1.022, 
-         1.024, 1.026, 1.028, 1.030, 1.032, 1.034, 1.036, 1.038, 1.040, 1.060, 1.080, 1.100]
+Tc_L = [
+    1.004098558580445 ± 0.00012838372820415597,
+    1.002880459951727 ± 0.00016614142151693173,
+    1.0019690678472521 ± 0.00020775901663022396,
+    1.0011767926962136 ± 0.00024041071306175725,
+    1.0005831960780498 ± 0.0002808961827846406,
+    0.9995852248655276 ± 0.0003212285341357723
+]
+Tc_vals = Measurements.value.(Tc_L)
+Tc_err = Measurements.uncertainty.(Tc_L)
 
-mags_def = 1
-suzz_kth(m_arr, T, nsites, k) = (1/T) * (nsites) * cumulant(m_arr, k)
-
-suzz = zeros(Float64, (length(lattice_sizes), length(temps)))
-err_suzz = zeros(Float64, (length(lattice_sizes), length(temps)))
-
-for Lidx in eachindex(lattice_sizes)
-    L = lattice_sizes[Lidx]
-    Threads.@threads for tidx in eachindex(temps)
-        T = temps[tidx]
-        mags = readdlm(joinpath("data", "2DModel", "Size$(L)", "mags", "potts_mags_temp$(T)_L$(L).txt"), ',', Float64)
-        mags ./= L^2
-
-        @views suzz[Lidx, tidx] = suzz_kth(mags[mags_def, :], T, L^2, 2)
-        @views err_suzz[Lidx, tidx] = bootstrap_err(mags[mags_def, :], A -> suzz_kth(A, T, L^2, 2); r=100)
-    end
-end
-
-suzz_star = zeros(Float64, length(lattice_sizes))
-error_suzz_star = zeros(Float64, length(lattice_sizes))
-T_star = zeros(Float64, length(lattice_sizes))
-T_star_err = zeros(Float64, length(lattice_sizes))
-
-for stepL in eachindex(lattice_sizes)
-    L = lattice_sizes[stepL]
-    ss, ts = findmax(suzz[stepL, :])
-    suzz_star[stepL] = ss
-    error_suzz_star[stepL] = err_suzz[stepL, ts]
-    T_star[stepL] = temps[ts]
-    T_star_err[stepL] = 0.5*(temps[ts+1] - temps[ts-1])
-end
-
-## Least squares fit to find the critical temperature
-model(x, p) = p[1] .+ p[2] * x.^(-inv(p[3]))
+fit_model(x, p) = p[1] .- p[2] * x.^-(1/p[3])
 p0 = [1.0, 1.0, 1.0]
-# wt = 1 ./ T_star_err
+# wt = inv.(Tc_err)
 
-fit = curve_fit(model, lattice_sizes, T_star, p0)  # weighted LsqFit (χ² minimization)
-Tc, A, ν = fit.param .± standard_errors(fit)
+fit = curve_fit(fit_model, lattice_sizes, Tc_vals, p0)
+par = fit.param
+par_err = stderror(fit)
 
+println(par .± par_err)
 
-## Plots
-# fig = Figure(resolution = (800, 600));
-# ax = Axis(fig[1, 1]; xlabel = "L^(-1/ν)", ylabel = "T*(L)", title="Scaling of peak location of susceptibility with size")
+# Plotting
+f = Figure();
+ax = Axis(f[1, 1], xlabel="L", ylabel="Tc(L)", title="Peak location v/s lattice size")
+lines!(ax, lattice_sizes[1]:lattice_sizes[end], 
+    fit_model(lattice_sizes[1]:lattice_sizes[end], par), label="Fit", color=:red)
+errorbars!(ax, lattice_sizes, Tc_vals, Tc_err, label="Data", color=:black)
+scatter!(ax, lattice_sizes, Tc_vals, label="Data", color=:black)
+axislegend(ax, merge=true)
+display(f)
 
-# # Plot the fit
-# x = 
-# lines!(ax, x, model.(x, Ref(p0)), color = :black, linestyle=:dot,
-#     label="Fit (slope=$(a1_with_err), intercept=$(a0_with_err))")
-# band!(ax, x_log, y_log_fit_val .- y_log_fit_val_err, y_log_fit_val .+ y_log_fit_val_err,
-#     color = (:black, 0.2), label="Fit (slope=$(a1_with_err), intercept=$(a0_with_err))")
+residual_sum = sum((fit_model(lattice_sizes, par) .- Tc_vals).^2 ./ Tc_err.^2)
 
-# errorbars!(ax, x_log, Measurements.value.(y_log), Measurements.uncertainty.(y_log),
-#     color = :black, whiskerwidth = 15, label="Data")
-# scatter!(ax, x_log, Measurements.value.(y_log), color = :red, label = "Data")
+#= NOTE ON RESULTS
 
-# axislegend(ax, merge=true, position=:lt)
-# display(fig)
-# save("plots/2Dmodel/finite_size_scaling/succeptibility_Tc_fss.svg", fig)
+These fits are without considering the errors on data points. I am getting huge parameter errors if I use this information. I am not sure why maybe I should try the python package for chi^2 fitting.
+Measurement{Float64}[0.99251 ± 0.0006, -0.181 ± 0.023, 1.408 ± 0.092]
+
+My first guess is that the gaussian fits are not able to capture the peak location, nu should be close to 0.84 but it is coming out to be 1.4. Mostly the higher the value of nu the slower the peak moves towards Tc. It can be seen in the fit plots that gaussian peak moving behind the actual susceptibility peak. Still the Tc value should be reliable as as L -> \infty the peak location should be at Tc for both the cases.
+
+=#
