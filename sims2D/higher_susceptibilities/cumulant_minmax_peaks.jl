@@ -1,10 +1,16 @@
 include("../../src/pottsmc.jl")
 using CairoMakie
 using LsqFit
+using PyCall
 
-Tc_inf = 0.99628906
+Tc_inf = 0.99691951 ± 7.4795e-04
 lattice_sizes = [48, 56, 64, 72, 80, 96, 128]
-cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple), (96, :cyan), (128, :deepskyblue)])
+cols = Dict([
+            (32, :blue), (48, :red), (56, :pink),
+            (64, :green), (72, :orange), (80, :purple),
+            (96, :cyan), (128, :deepskyblue)
+])
+
 temps = [0.982, 0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.998,
          1.000, 1.002, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014, 1.016, 1.018, 1.020]
 
@@ -20,7 +26,7 @@ err_suzz = zeros(Float64, (length(lattice_sizes), length(temps)))
 parabola(x, p) = p[1] .+ p[2]*x .+ p[3]*x.^2
 
 parabola_extrema(p) = -p[2] / (2 * p[3])
-p0 = [0.0, 0.0, 1.0]
+p0 = [1.0, 1.0, 1.0]
 
 println("Calculating susceptibilities ...")
 for Lidx in eachindex(lattice_sizes)
@@ -74,7 +80,48 @@ scatterlines!(ax, inv.(lattice_sizes), Measurements.value.(min_locations) .- Tc_
 axislegend(ax, merge=true)
 display(f)
 
-amax, bmax = linear_least_squares(inv.(lattice_sizes), max_locations .- Tc_inf)
-amin, bmin = linear_least_squares(inv.(lattice_sizes), min_locations .- Tc_inf)
+min_loc_values = Measurements.value.(min_locations)
+min_loc_errs = Measurements.uncertainty.(min_locations)
+max_loc_values = Measurements.value.(max_locations)
+max_loc_errs = Measurements.uncertainty.(max_locations)
+
+println("Fitting ...")
+py"""
+import numpy as np
+import lmfit
+
+def residuals(params, xvals, yvals=None, eps=None):
+    tinf = params['a']
+    scaling = params['b']
+    expnu = params['c']
+
+    model = tinf + scaling * (xvals ** (- 1 / expnu))
+    if yvals is None:
+        return model
+    if eps is None:
+        return model - yvals
+    return (model - yvals) / eps
+
+pars_min = Parameters()
+pars_min.add_many(('a', 0.0), ('b', 0.0), ('c', 0.0))
+pars_max = Parameters()
+pars_max.add_many(('a', 0.0), ('b', 0.0), ('c', 0.0))
+
+out_min = minimize(residuals, pars_min, args=($lattice_sizes, $min_loc_values, $min_loc_errs))
+out_max = minimize(residuals, pars_max, args=($lattice_sizes, $max_loc_values, $max_loc_errs))
+
+tc_min = out_min.params['a'].value
+tc_max = out_max.params['a'].value
+tc_min_err = out_min.params['a'].stderr
+tc_max_err = out_max.params['a'].stderr
+"""
+
+tc_min = py"tc_min" ± py"tc_min_err"
+tc_max = py"tc_max" ± py"tc_max_err"
+
+println("Tc_min = $tc_min")
+println("Tc_max = $tc_max")
+println("Tc_inf = $Tc_inf")
+
 
 # TODO: THE ERROR ESTIMATES SUCK ASS
