@@ -15,7 +15,7 @@ temps = [0.982, 0.984, 0.986, 0.988, 0.990, 0.992, 0.994, 0.996, 0.998,
          1.000, 1.002, 1.004, 1.006, 1.008, 1.010, 1.012, 1.014, 1.016, 1.018, 1.020]
 
 mags_def = 1
-suzz_order = 3
+suzz_order = 6
 suzz_kth(m_arr, T, nsites, k) = (1/T) * (nsites) * cumulant(m_arr, k)
 
 mag = zeros(Float64, (length(lattice_sizes), length(temps)))
@@ -46,46 +46,27 @@ end
 min_locations = fill(0.0 ± 0.0, length(lattice_sizes))
 max_locations = fill(0.0 ± 0.0, length(lattice_sizes))
 
-println("Plotting ...")
-fs = Figure();
-axs = Axis(fs[1, 1], xlabel="T", ylabel="χ^($suzz_order)")
+println("Calculating peaks ...")
 for Lidx=eachindex(lattice_sizes)
     L = lattice_sizes[Lidx]
     max_peak = findmax(suzz[Lidx, :])
     min_peak = findmin(suzz[Lidx, :])
-    min_range = (min_peak[2]-2):(min_peak[2]+2)
-    max_range = (max_peak[2]-2):(max_peak[2]+2)
+    min_range = (min_peak[2]-2):(min_peak[2]+1)
+    max_range = (max_peak[2]-1):(max_peak[2]+2)
 
     fit_min = curve_fit(parabola, temps[min_range], suzz[Lidx, min_range], p0)
     fit_max = curve_fit(parabola, temps[max_range], suzz[Lidx, max_range], p0)
 
     min_locations[Lidx] = parabola_extrema(fit_min.param .± stderror(fit_min))
     max_locations[Lidx] = parabola_extrema(fit_max.param .± stderror(fit_max))
-
-    lines!(axs, temps[min_range[1]]:0.0001:temps[min_range[end]], parabola(temps[min_range[1]]:0.0001:temps[min_range[end]], fit_min.param), color=:grey7, label="L = $L")
-    lines!(axs, temps[max_range[1]]:0.0001:temps[max_range[end]], parabola(temps[max_range[1]]:0.0001:temps[max_range[end]], fit_max.param), color=:grey7, label="L = $L")
-    errorbars!(axs, temps, suzz[Lidx, :], err_suzz[Lidx, :], color=cols[L], label="L = $L", whiskerwidth=12)
-    scatterlines!(axs, temps, suzz[Lidx, :], color=cols[L], label="L = $L")
 end
-axislegend(axs, position=:rb, merge=true)
-display(fs)
-
-# log(T - Tc_inf) ∝ log(L)
-
-println("Plotting ...")
-f = Figure();
-ax = Axis(f[1, 1], xlabel="1/L", ylabel="T - Tc_inf")
-scatterlines!(ax, inv.(lattice_sizes), Measurements.value.(max_locations) .- Tc_inf, color=:red, label="Maxima")
-scatterlines!(ax, inv.(lattice_sizes), Measurements.value.(min_locations) .- Tc_inf, color=:blue, label="Minima")
-axislegend(ax, merge=true)
-display(f)
 
 min_loc_values = Measurements.value.(min_locations)
 min_loc_errs = Measurements.uncertainty.(min_locations)
 max_loc_values = Measurements.value.(max_locations)
 max_loc_errs = Measurements.uncertainty.(max_locations)
 
-println("Fitting ...")
+println("Fitting peak location to find Tc ...")
 py"""
 import numpy as np
 import lmfit
@@ -102,13 +83,13 @@ def residuals(params, xvals, yvals=None, eps=None):
         return model - yvals
     return (model - yvals) / eps
 
-pars_min = Parameters()
-pars_min.add_many(('a', 0.0), ('b', 0.0), ('c', 0.0))
-pars_max = Parameters()
-pars_max.add_many(('a', 0.0), ('b', 0.0), ('c', 0.0))
+pars_min = lmfit.Parameters()
+pars_min.add_many(('a', 1.0), ('b', 1.0), ('c', 1.0))
+pars_max = lmfit.Parameters()
+pars_max.add_many(('a', 1.0), ('b', 1.0), ('c', 1.0))
 
-out_min = minimize(residuals, pars_min, args=($lattice_sizes, $min_loc_values, $min_loc_errs))
-out_max = minimize(residuals, pars_max, args=($lattice_sizes, $max_loc_values, $max_loc_errs))
+out_min = lmfit.minimize(residuals, pars_min, args=($lattice_sizes, $min_loc_values, $min_loc_errs), method='leastsq')
+out_max = lmfit.minimize(residuals, pars_max, args=($lattice_sizes, $max_loc_values, $max_loc_errs), method='leastsq')
 
 tc_min = out_min.params['a'].value
 tc_max = out_max.params['a'].value
@@ -123,5 +104,11 @@ println("Tc_min = $tc_min")
 println("Tc_max = $tc_max")
 println("Tc_inf = $Tc_inf")
 
-
-# TODO: THE ERROR ESTIMATES SUCK ASS
+# write results to a file
+open("data/cumulant_minmax_peak_collapse.txt", "a") do f
+    println(f, "Order = $suzz_order ---------------------------------------------------+")
+    println(f, "|   Tc_min = $(Measurements.value.(tc_min)) ± $(Measurements.uncertainty.(tc_min))")
+    println(f, "|   Tc_max = $(Measurements.value.(tc_max)) ± $(Measurements.uncertainty.(tc_max))")
+    println(f, "|   Tc_inf = $(Measurements.value.(Tc_inf)) ± $(Measurements.uncertainty.(Tc_inf))")
+    println(f, "+----------------------------------------------------------------------+\n")
+end
