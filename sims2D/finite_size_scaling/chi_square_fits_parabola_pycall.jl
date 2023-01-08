@@ -64,7 +64,7 @@ for Lidx=eachindex(lattice_sizes)
     pars = lmfit.Parameters()
     pars.add_many(('a', 1.0), ('b', 1.0), ('c', 1.0))
 
-    parabola_fit = lmfit.minimize($residuals, pars, args=($(temps[trange]), $(suzz[Lidx, trange]), $wt), method='leastsq')
+    parabola_fit = lmfit.minimize(residuals, pars, args=($(temps[trange]), $(suzz[Lidx, trange]), $wt), method='leastsq')
     
     fitted_pars = {}
     for name, param in parabola_fit.params.items():
