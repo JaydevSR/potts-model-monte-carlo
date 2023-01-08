@@ -33,14 +33,14 @@ end
 println("Making fits ...")
 fs = Figure();
 axs = Axis(fs[1, 1], xlabel="T", ylabel="χ")
-dfl = open("data/susceptibility_fit_params.txt", "w")
+dfl = open("data/susceptibility_fit_params_peak_gaussian.txt", "w")
 for Lidx=eachindex(lattice_sizes)
     L = lattice_sizes[Lidx]
 
     # susceptibility to gaussian fit
-    suzz_model(x, p) = p[1]*exp(1).^(- p[2] * (x .- p[3]).^2)
-    p0s = [0.5, 1.0, 1.0]
-    wt = 1 ./ err_suzz[Lidx, :].^2
+    suzz_model(x, p) = p[1]*exp.(- p[2] * (x .- p[3]).^2)
+    p0s = [1.0, 1.0, 1.0]
+    wt = inv.(err_suzz[Lidx, :].^2)
 
     errorbars!(axs, temps, suzz[Lidx, :], err_suzz[Lidx, :], color=cols[L], label="L = $L", whiskerwidth=12)
     scatter!(axs, temps, suzz[Lidx, :], color=cols[L], label="L = $L")
@@ -51,9 +51,7 @@ for Lidx=eachindex(lattice_sizes)
     par = gaussian_fit.param
     parerr = stderror(gaussian_fit)
     println(dfl, "Size $L :")
-    println(dfl, " * scaling parameter = $(par[1]) ± $(parerr[1])")
-    println(dfl, " * width parameter = $(par[2]) ± $(parerr[2])")
-    println(dfl, " * center parameter = $(par[3]) ± $(parerr[3])")
+    println(dfl, " * peak location = $(par[3]) ± $(parerr[3])")
     println(dfl, "\n")
     lines!(axs, temps[1]:0.0001:temps[end], suzz_model(temps[1]:0.0001:temps[end], gaussian_fit.param), color=cols[L], label="L = $L")
 end
