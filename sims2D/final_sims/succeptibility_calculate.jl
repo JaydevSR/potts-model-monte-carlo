@@ -10,6 +10,8 @@ temps = [
     1.028, 1.030, 1.032, 1.034, 1.036, 1.038, 1.040
 ]
 
+mags_def = 1 # maximum definition
+
 # save temps
 open(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), "w") do f
     writedlm(f, temps)
@@ -25,8 +27,6 @@ for stepL in eachindex(lattice_sizes)
     Threads.@threads for idx in eachindex(temps)
         T = temps[idx]
         mags = readdlm(joinpath("data", "2DModel", "Size$(L)", "mags", "potts_mags_temp$(T)_L$(L).txt"), ',', Float64)
-
-        mags_def = 1
 
         suzzs[1, idx] = mean(mags[mags_def, :]) / L^2
         errors[1, idx] = bootstrap_err(mags[mags_def, :] ./ L^2, mean)
