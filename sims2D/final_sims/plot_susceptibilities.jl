@@ -6,20 +6,19 @@ lattice_sizes = [48, 56, 64, 72, 80]
 cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple), (96, :cyan), (128, :deepskyblue)])
 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
-max_order = 7
+max_order = 5
 
 figures = [Figure(resolution=(800, 600)) for i in 1:max_order]
-axes = [Axis(figures[1][1, 1], xlabel="T", ylabel="m(T)", title="Mean Magnetization Per Site")]
-append!(axes, [
+axes = [
     Axis(
         figures[i][1, 1],
-        xlabel="T", ylabel="χₙ(T)",
-        title="Order $(i-1) Susceptibility Per Site"
-    ) for i in 2:max_order]
-)
+        xlabel=L"T", ylabel=L"\chi_{%$i}(T)",
+        title=L"\chi_{%$i}(T) = \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}"
+    ) for i in 1:max_order
+]
 
-for i in 2:max_order
-    xlims!(axes[i], (0.98, 1.02))
+for i in 1:max_order
+    xlims!(axes[i], (0.98, 1.022))
 end
 
 # plot susceptibilities
@@ -40,7 +39,6 @@ for idx in 2:max_order
     axislegend(axes[idx], position=:lt, merge=true)
 end
 
-save(joinpath("plots", "2DModel", "final_plots", "potts_magnetisation.svg"), figures[1])
-for idx in 2:max_order
-    save(joinpath("plots", "2DModel", "final_plots", "potts_suzzs_order$(idx-1).svg"), figures[idx])
+for idx in 1:max_order
+    save(joinpath("plots", "2DModel", "final_plots", "potts_suzzs_order$(idx).svg"), figures[idx])
 end
