@@ -4,7 +4,7 @@ using CairoMakie
 
 lattice_size = 64
 eqsteps = 5_000
-n_steps = 50_000
+n_steps = 1_00_000
 
 temperature = 0.9950
 potts = PottsModel2D(lattice_size, 3, :cold)
@@ -81,7 +81,7 @@ axfit = Axis(ffit[1, 1], xlabel=L"r", ylabel=L"C(r) = \langle \sigma(0) \sigma(r
 
 scatter!(axfit, r_vals, c_r, label="numerical data")
 
-fit_eqn = L"A \left[ \exp\left( \frac{r}{\xi} \right) + \exp\left( \frac{L - r}{\xi} \right) \right]"
+fit_eqn = L"A \left[ \exp\left( \frac{-r}{\xi} \right) + \exp\left( \frac{L - r}{\xi} \right) \right]"
 lines!(axfit, r_vals, py"min_series", label=fit_eqn)
 axislegend(axfit, position=:ct)
 # display(ffit)
