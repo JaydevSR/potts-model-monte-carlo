@@ -6,7 +6,7 @@ lattice_sizes = [48, 56, 64, 72, 80]
 cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple), (96, :cyan), (128, :deepskyblue)])
 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
-max_order = 6
+max_order = 7
 
 figures = [Figure(resolution=(800, 600)) for i in 1:max_order]
 axes = [Axis(figures[1][1, 1], xlabel="T", ylabel="m(T)", title="Mean Magnetization Per Site")]

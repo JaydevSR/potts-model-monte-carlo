@@ -17,7 +17,7 @@ open(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), "w") do
     writedlm(f, temps)
 end
 
-max_order = 6
+max_order = 7
 errors = zeros(Float64, (max_order, length(temps)))
 suzzs = zeros(Float64, (max_order, length(temps)))
 
