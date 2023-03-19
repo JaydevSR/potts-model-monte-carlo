@@ -14,7 +14,7 @@ xranges = Dict(
 )
 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
-max_order = 5
+max_order = 6
 
 order_colors = Dict(:C3C1 => :dodgerblue, :C4C2 => :orange, :C5C1 => :pink, :C6C2 => :cyan)
 
