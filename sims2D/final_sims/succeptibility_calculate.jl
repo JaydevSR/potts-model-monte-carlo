@@ -1,6 +1,6 @@
 include("../../src/pottsmc.jl")
 
-suzz_kth(M_arr, T, nsites, k) = cumulant(M_arr, k) / (T * nsites)
+suzz_kth(M_arr, T, nsites, k) = cumulant(M_arr, k) / (T^(k-1) * nsites)
 
 lattice_sizes = [32, 48, 56, 64, 72, 80, 96, 128]
 
