@@ -36,7 +36,7 @@ axcorr = Axis(fcorr[1, 1], xlabel=L"r", ylabel=L"C(r) = \langle \sigma(0) \sigma
 scatterlines!(axcorr, 0:lattice_size, [ss_corr; 1.0], linestyle=:dashdot)
 save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_L$lattice_size.svg"), fcorr)
 
-r_vals = lattice_size÷4 : 3lattice_size÷4 + 2
+r_vals = lattice_size÷4 - 1: 3lattice_size÷4 + 3
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -81,7 +81,7 @@ axfit = Axis(ffit[1, 1], xlabel=L"r", ylabel=L"C(r) = \langle \sigma(0) \sigma(r
 
 scatter!(axfit, r_vals, c_r, label="numerical data")
 
-fit_eqn = L"A \left[ \exp\left( \frac{-r}{\xi} \right) + \exp\left( \frac{L - r}{\xi} \right) \right]"
+fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{\xi} \right) \right]"
 lines!(axfit, r_vals, py"min_series", label=fit_eqn)
 axislegend(axfit, position=:ct)
 # display(ffit)

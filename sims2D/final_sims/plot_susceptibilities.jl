@@ -12,22 +12,22 @@ figures = [Figure(resolution=(800, 600)) for i in 1:max_order]
 axes = [
     Axis(
         figures[1][1, 1],
-        xlabel=L"T", ylabel=L"m(T)",
-        title=L"m(T) = \frac{1}{L^2} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}"
+        xlabel=L"T", ylabel=L"\langle m\rangle",
+        title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}"
     ),
 
     Axis(
         figures[2][1, 1],
-        xlabel=L"T", ylabel=L"\chi(T)",
-        title=L"\chi(T) = \frac{1}{L^2} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}"
+        xlabel=L"T", ylabel=L"\chi",
+        title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}"
     )
 ]
 
 append!(axes, [
     Axis(
         figures[i][1, 1],
-        xlabel=L"T", ylabel=L"\chi_{%$i}(T)",
-        title=L"\chi_{%$i}(T) = \frac{1}{L^2} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}"
+        xlabel=L"T", ylabel=L"\chi_{%$i}",
+        title=L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}"
     ) for i in 3:max_order
 ])
 
