@@ -6,17 +6,20 @@ using CairoMakie
 # load data
 lattice_sizes = [48, 64, 80, 96, 128]
 xranges = Dict(
-    48 => (0.98, 1.03),
+    48 => (0.98, 1.025),
     64 => (0.98, 1.025),
-    80 => (0.98, 1.015),
-    96 => (0.98, 1.015),
-    128 => (0.98, 1.015)
+    80 => (0.98, 1.025),
+    96 => (0.98, 1.025),
+    128 => (0.98, 1.025)
 )
 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
 max_order = 6
 
-order_colors = Dict(:C3C1 => :dodgerblue, :C4C2 => :orange, :C5C1 => :pink, :C6C2 => :cyan)
+order_colors = Dict(:C3C1 => :dodgerblue2, :C4C2 => :orange, :C5C1 => :mediumseagreen, :C6C2 => :orchid3)
+markersize = 18
+linewidth = 4
+marker = :diamond
 
 # Plot Ratios
 for stepL in eachindex(lattice_sizes)    
@@ -29,75 +32,110 @@ for stepL in eachindex(lattice_sizes)
 
     suzzs_L = suzzs .± errors
 
-    fig = Figure(resolution=(800, 800))
+    fig = Figure(resolution=(800, 600))
     axes = [
-        Axis(fig[1, 1], xlabel=L"T", ylabel="Ratio", title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}"),
+        Axis(fig[1, 1],
+            title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
+            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xlabelsize = 22, ylabelsize = 22,
+            xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
-        Axis(fig[2, 1], xlabel=L"T", ylabel="Ratio", title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}"),
+        Axis(fig[2, 1], ylabel="Ratio",
+            title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
+            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xlabelsize = 22, ylabelsize = 22,   
+            xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
-        Axis(fig[3, 1], xlabel=L"T", ylabel="Ratio", title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}")
+        Axis(fig[3, 1], xlabel=L"T",
+            title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
+            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xlabelsize = 22, ylabelsize = 22,
+            xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
     ]
+
+    for ax in axes
+        hlines!(ax, [0], linewidth = 1.5, color = :red)
+    end
 
     # χ_3 / χ_1    
     r31 = suzzs_L[3, :] ./ suzzs_L[1, :]
     r31_values = Measurements.value.(r31)
     r31_errors = Measurements.uncertainty.(r31)
 
-    band!(axes[1], temps, r31_values .- r31_errors, r31_values .+ r31_errors,
-        color = (order_colors[:C3C1], 0.25), label=L"\chi_3 / \chi_1")
+    # band!(axes[1], temps, r31_values .- r31_errors, r31_values .+ r31_errors,
+    #     color = (order_colors[:C3C1], 0.25), label=L"\chi_3 / \chi_1")
 
-    errorbars!(axes[1], temps, r31_values, r31_errors, label=L"\chi_3 / \chi_1", whiskerwidth=12)
+    errorbars!(axes[1], temps, r31_values, r31_errors, label=L"\chi_3 / \chi_1", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[1], temps, r31_values, label=L"\chi_3 / \chi_1", color=order_colors[:C3C1])
+    scatterlines!(axes[1], temps, r31_values, label=L"\chi_3 / \chi_1",
+        color=order_colors[:C3C1], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_4 / χ_2
     r42 = suzzs_L[4, :] ./ suzzs_L[2, :]
     r42_values = Measurements.value.(r42)
     r42_errors = Measurements.uncertainty.(r42)
 
-    band!(axes[1], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
-        color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
-    band!(axes[2], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
-        color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
+    # band!(axes[1], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
+    #     color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
+    # band!(axes[2], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
+    #     color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
 
-    errorbars!(axes[1], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12)
-    errorbars!(axes[2], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12)
+    errorbars!(axes[1], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[2], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[1], temps, r42_values, label=L"\chi_4 / \chi_2", color=order_colors[:C4C2])
-    scatterlines!(axes[2], temps, r42_values, label=L"\chi_4 / \chi_2", color=order_colors[:C4C2])
+    scatterlines!(axes[1], temps, r42_values, label=L"\chi_4 / \chi_2",
+        color=order_colors[:C4C2], marker=marker, markersize=markersize, linewidth=linewidth)
+    scatterlines!(axes[2], temps, r42_values, label=L"\chi_4 / \chi_2",
+        color=order_colors[:C4C2], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_5 / χ_1
     r51 = suzzs_L[5, :] ./ suzzs_L[1, :]
     r51_values = Measurements.value.(r51)
     r51_errors = Measurements.uncertainty.(r51)
 
-    band!(axes[2], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
-        color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
-    band!(axes[3], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
-        color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
+    # band!(axes[2], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
+    #     color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
+    # band!(axes[3], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
+    #     color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
 
-    errorbars!(axes[2], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12)
-    errorbars!(axes[3], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12)
+    errorbars!(axes[2], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[3], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[2], temps, r51_values, label=L"\chi_5 / \chi_1", color=order_colors[:C5C1])
-    scatterlines!(axes[3], temps, r51_values, label=L"\chi_5 / \chi_1", color=order_colors[:C5C1])
+    scatterlines!(axes[2], temps, r51_values,
+        label=L"\chi_5 / \chi_1", color=order_colors[:C5C1], marker=marker, markersize=markersize, linewidth=linewidth)
+    scatterlines!(axes[3], temps, r51_values,
+        label=L"\chi_5 / \chi_1", color=order_colors[:C5C1], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_6 / χ_2
     r62 = suzzs_L[6, :] ./ suzzs_L[2, :]
     r62_values = Measurements.value.(r62)
     r62_errors = Measurements.uncertainty.(r62)
 
-    band!(axes[3], temps, r62_values .- r62_errors, r62_values .+ r62_errors,
-        color = (order_colors[:C6C2], 0.25), label=L"\chi_6 / \chi_2")
+    # band!(axes[3], temps, r62_values .- r62_errors, r62_values .+ r62_errors,
+    #     color = (order_colors[:C6C2], 0.25), label=L"\chi_6 / \chi_2")
 
-    errorbars!(axes[3], temps, r62_values, r62_errors, label=L"\chi_6 / \chi_2", whiskerwidth=12)
+    errorbars!(axes[3], temps, r62_values, r62_errors, label=L"\chi_6 / \chi_2", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[3], temps, r62_values, label=L"\chi_6 / \chi_2", color=order_colors[:C6C2])
+    scatterlines!(axes[3], temps, r62_values,
+        label=L"\chi_6 / \chi_2", color=order_colors[:C6C2], marker=marker, markersize=markersize, linewidth=linewidth)
 
+    plots_in_fig = AbstractPlot[]
+    labels_in_fig = AbstractString[]
     for ax in axes
-        axislegend(ax, merge=true)
+        pl, lb = Makie.get_labeled_plots(ax, merge=false, unique=false)
+        append!(plots_in_fig, pl)
+        append!(labels_in_fig, lb)
         xlims!(ax, xranges[L])
     end
+
+    ulabels = Base.unique(labels_in_fig)
+    mergedplots = [[lp for (i, lp) in enumerate(plots_in_fig) if labels_in_fig[i] == ul]
+            for ul in ulabels]
+
+    Legend(fig[:, 2], mergedplots, ulabels)
 
     save(joinpath("plots", "2DModel", "final_plots", "higher_order_susceptibility_ratios_size$(L).svg"), fig)
 end

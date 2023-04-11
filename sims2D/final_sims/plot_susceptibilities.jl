@@ -8,31 +8,43 @@ cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
 max_order = 6
 
-figures = [Figure(resolution=(800, 600)) for i in 1:max_order]
+figures = [Figure(resolution=(900, 600)) for i in 1:max_order]
 axes = [
     Axis(
         figures[1][1, 1],
         xlabel=L"T", ylabel=L"\langle m\rangle",
-        title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}"
+        title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}",
+        xticks = temps[1:2:end],
+        xlabelsize = 22, ylabelsize = 22,
+        xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
     ),
 
     Axis(
         figures[2][1, 1],
         xlabel=L"T", ylabel=L"\chi",
-        title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}"
+        title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}",
+        xticks = temps[1:2:end],
+        xlabelsize = 22, ylabelsize = 22,
+        xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
     )
 ]
 
 append!(axes, [
     Axis(
         figures[i][1, 1],
-        xlabel=L"T", ylabel=L"\chi_{%$i}",
-        title=L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}"
+        xlabel = L"T", ylabel = L"\chi_{%$i}",
+        title = L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}",
+        xticks = temps[1:2:end],
+        xlabelsize = 22, ylabelsize = 22,
+        xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
     ) for i in 3:max_order
 ])
 
 for i in 1:max_order
-    xlims!(axes[i], (0.98, 1.022))
+    xlims!(axes[i], (0.982, 1.022))
 end
 
 # plot susceptibilities
@@ -44,13 +56,15 @@ for stepL in eachindex(lattice_sizes)
     for order_k in 1:max_order
         ax = axes[order_k]
         errorbars!(ax, temps, suzzs[order_k, :], errors[order_k, :], color=:black, whiskerwidth=12, label="L = $L")
-        scatterlines!(ax, temps, suzzs[order_k, :], color = cols[L], markersize=15, label="L = $L")
+        scatterlines!(ax, temps, suzzs[order_k, :],
+            # color = cols[L],
+            markersize=18, linewidth=4, 
+            label="L = $L")
     end
 end
 
-axislegend(axes[1], position=:rt, merge=true)
-for idx in 2:max_order
-    axislegend(axes[idx], position=:lt, merge=true)
+for idx in 1:max_order
+    Legend(figures[idx][1, 2], axes[idx], merge = true)
 end
 
 save(joinpath("plots", "2DModel", "final_plots", "potts_magnetisation.svg"), figures[1])
