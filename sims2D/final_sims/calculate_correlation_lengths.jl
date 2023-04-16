@@ -6,7 +6,7 @@ lattice_size = 64
 eqsteps = 5_000
 n_steps = 1_00_000
 
-temperature = 0.9950
+temperature = 1.010
 potts = PottsModel2D(lattice_size, 3, :cold)
 stack=LazyStack(Int)
 cluster=falses(size(potts.lattice))
@@ -30,13 +30,20 @@ ss_corr ./= maximum(ss_corr)
 
 # Fit corr_model to the tail of ss_corr
 
-fcorr = Figure();
-axcorr = Axis(fcorr[1, 1], xlabel=L"r", ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle", title="Site-Site Correlation Function for L=$lattice_size, T=$temperature")
+fcorr = Figure(fontsize = 20);
+axcorr = Axis(fcorr[1, 1],
+    xlabel=L"r",
+    ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle",
+    title="Site-Site Correlation Function for L=$lattice_size, T=$temperature",
+    xlabelsize = 24, ylabelsize = 24,
+    xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+    ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
-scatterlines!(axcorr, 0:lattice_size, [ss_corr; 1.0], linestyle=:dashdot)
-save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_L$lattice_size.svg"), fcorr)
+scatterlines!(axcorr, 0:lattice_size, [ss_corr; 1.0], linestyle=:dashdot, linewidth=2, markersize=18)
+save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_T$(temperature)_L$lattice_size.svg"), fcorr)
+# display(fcorr)
 
-r_vals = lattice_size÷4 - 1: 3lattice_size÷4 + 3
+r_vals = lattice_size÷4 + 2 : 3lattice_size÷4
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -74,15 +81,21 @@ a_fit = py"fitted_pars['a'][0]" ± py"fitted_pars['a'][1]"
 ξ_fit = py"fitted_pars['b'][0]" ± py"fitted_pars['b'][1]"
 
 println("Plotting ...")
-ffit = Figure();
-
+ffit = Figure(fontsize = 20);
 fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T=$temperature \n Fit Parameters: A=$a_fit, ξ=$ξ_fit"
-axfit = Axis(ffit[1, 1], xlabel=L"r", ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle", title=fit_title)
 
-scatter!(axfit, r_vals, c_r, label="numerical data")
+axfit = Axis(ffit[1, 1],
+    xlabel=L"r",
+    ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle",
+    title=fit_title,
+    xlabelsize = 24, ylabelsize = 24,
+    xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
+    ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
+
+scatter!(axfit, r_vals, c_r, label="numerical data", markersize=18)
 
 fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{\xi} \right) \right]"
-lines!(axfit, r_vals, py"min_series", label=fit_eqn)
+lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=2)
 axislegend(axfit, position=:ct)
 # display(ffit)
-save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_L$lattice_size.svg"), ffit)
+save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_T$(temperature)_L$lattice_size.svg"), ffit)
