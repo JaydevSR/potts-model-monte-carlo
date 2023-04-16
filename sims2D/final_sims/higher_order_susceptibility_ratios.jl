@@ -32,26 +32,26 @@ for stepL in eachindex(lattice_sizes)
 
     suzzs_L = suzzs .± errors
 
-    fig = Figure(resolution=(800, 600))
+    fig = Figure(resolution=(900, 600), fontsize = 19)
     axes = [
         Axis(fig[1, 1],
             title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
             xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 22, ylabelsize = 22,
+            xlabelsize = 24, ylabelsize = 24,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
         Axis(fig[2, 1], ylabel="Ratio",
             title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
             xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 22, ylabelsize = 22,   
+            xlabelsize = 24, ylabelsize = 24,   
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
         Axis(fig[3, 1], xlabel=L"T",
             title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
             xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 22, ylabelsize = 22,
+            xlabelsize = 24, ylabelsize = 24,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
     ]
