@@ -21,6 +21,13 @@ markersize = 18
 linewidth = 4
 marker = :diamond
 
+psuedoTc = Dict(
+            48 => 1.004098703447542,
+            64 => 1.0009103256327856,
+            80 => 0.9997345330528584,
+            96 => 0.9988572671581376,
+            128 => 0.997941002359664)
+
 # Plot Ratios
 for stepL in eachindex(lattice_sizes)    
     L = lattice_sizes[stepL]
@@ -32,25 +39,30 @@ for stepL in eachindex(lattice_sizes)
 
     suzzs_L = suzzs .± errors
 
+    # psuedoTc[L] = temps[findmax(suzzs[2, :])[2]]
+    temps_scaled = temps ./ psuedoTc[L]
+
+    temps_scaled = round.(temps_scaled, digits=3)
+
     fig = Figure(resolution=(900, 600), fontsize = 19)
     axes = [
         Axis(fig[1, 1],
             title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
-            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 24, ylabelsize = 24,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
         Axis(fig[2, 1], ylabel="Ratio",
             title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
-            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 24, ylabelsize = 24,   
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
 
-        Axis(fig[3, 1], xlabel=L"T",
+        Axis(fig[3, 1], xlabel=L"T / T_c(L)",
             title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
-            xticks = temps[1:2:end], yticks = WilkinsonTicks(5),
+            xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 24, ylabelsize = 24,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
@@ -65,12 +77,12 @@ for stepL in eachindex(lattice_sizes)
     r31_values = Measurements.value.(r31)
     r31_errors = Measurements.uncertainty.(r31)
 
-    # band!(axes[1], temps, r31_values .- r31_errors, r31_values .+ r31_errors,
+    # band!(axes[1], temps_scaled, r31_values .- r31_errors, r31_values .+ r31_errors,
     #     color = (order_colors[:C3C1], 0.25), label=L"\chi_3 / \chi_1")
 
-    errorbars!(axes[1], temps, r31_values, r31_errors, label=L"\chi_3 / \chi_1", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[1], temps_scaled, r31_values, r31_errors, label=L"\chi_3 / \chi_1", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[1], temps, r31_values, label=L"\chi_3 / \chi_1",
+    scatterlines!(axes[1], temps_scaled, r31_values, label=L"\chi_3 / \chi_1",
         color=order_colors[:C3C1], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_4 / χ_2
@@ -78,17 +90,17 @@ for stepL in eachindex(lattice_sizes)
     r42_values = Measurements.value.(r42)
     r42_errors = Measurements.uncertainty.(r42)
 
-    # band!(axes[1], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
+    # band!(axes[1], temps_scaled, r42_values .- r42_errors, r42_values .+ r42_errors,
     #     color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
-    # band!(axes[2], temps, r42_values .- r42_errors, r42_values .+ r42_errors,
+    # band!(axes[2], temps_scaled, r42_values .- r42_errors, r42_values .+ r42_errors,
     #     color = (order_colors[:C4C2], 0.25), label=L"\chi_4 / \chi_2")
 
-    errorbars!(axes[1], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
-    errorbars!(axes[2], temps, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[1], temps_scaled, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[2], temps_scaled, r42_values, r42_errors, label=L"\chi_4 / \chi_2", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[1], temps, r42_values, label=L"\chi_4 / \chi_2",
+    scatterlines!(axes[1], temps_scaled, r42_values, label=L"\chi_4 / \chi_2",
         color=order_colors[:C4C2], marker=marker, markersize=markersize, linewidth=linewidth)
-    scatterlines!(axes[2], temps, r42_values, label=L"\chi_4 / \chi_2",
+    scatterlines!(axes[2], temps_scaled, r42_values, label=L"\chi_4 / \chi_2",
         color=order_colors[:C4C2], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_5 / χ_1
@@ -96,17 +108,17 @@ for stepL in eachindex(lattice_sizes)
     r51_values = Measurements.value.(r51)
     r51_errors = Measurements.uncertainty.(r51)
 
-    # band!(axes[2], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
+    # band!(axes[2], temps_scaled, r51_values .- r51_errors, r51_values .+ r51_errors,
     #     color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
-    # band!(axes[3], temps, r51_values .- r51_errors, r51_values .+ r51_errors,
+    # band!(axes[3], temps_scaled, r51_values .- r51_errors, r51_values .+ r51_errors,
     #     color = (order_colors[:C5C1], 0.25), label=L"\chi_5 / \chi_1")
 
-    errorbars!(axes[2], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
-    errorbars!(axes[3], temps, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[2], temps_scaled, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[3], temps_scaled, r51_values, r51_errors, label=L"\chi_5 / \chi_1", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[2], temps, r51_values,
+    scatterlines!(axes[2], temps_scaled, r51_values,
         label=L"\chi_5 / \chi_1", color=order_colors[:C5C1], marker=marker, markersize=markersize, linewidth=linewidth)
-    scatterlines!(axes[3], temps, r51_values,
+    scatterlines!(axes[3], temps_scaled, r51_values,
         label=L"\chi_5 / \chi_1", color=order_colors[:C5C1], marker=marker, markersize=markersize, linewidth=linewidth)
 
     # χ_6 / χ_2
@@ -114,12 +126,12 @@ for stepL in eachindex(lattice_sizes)
     r62_values = Measurements.value.(r62)
     r62_errors = Measurements.uncertainty.(r62)
 
-    # band!(axes[3], temps, r62_values .- r62_errors, r62_values .+ r62_errors,
+    # band!(axes[3], temps_scaled, r62_values .- r62_errors, r62_values .+ r62_errors,
     #     color = (order_colors[:C6C2], 0.25), label=L"\chi_6 / \chi_2")
 
-    errorbars!(axes[3], temps, r62_values, r62_errors, label=L"\chi_6 / \chi_2", whiskerwidth=12, linewidth=2)
+    errorbars!(axes[3], temps_scaled, r62_values, r62_errors, label=L"\chi_6 / \chi_2", whiskerwidth=12, linewidth=2)
 
-    scatterlines!(axes[3], temps, r62_values,
+    scatterlines!(axes[3], temps_scaled, r62_values,
         label=L"\chi_6 / \chi_2", color=order_colors[:C6C2], marker=marker, markersize=markersize, linewidth=linewidth)
 
     plots_in_fig = AbstractPlot[]
@@ -139,6 +151,8 @@ for stepL in eachindex(lattice_sizes)
 
     save(joinpath("plots", "2DModel", "final_plots", "higher_order_susceptibility_ratios_size$(L).svg"), fig)
 end
+
+println(psuedoTc)
 
 # f = Figure(resolution=(1000, 600));
 # axes = [

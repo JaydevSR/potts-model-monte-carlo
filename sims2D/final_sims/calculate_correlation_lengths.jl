@@ -2,11 +2,19 @@ include("../../src/pottsmc.jl")
 using PyCall
 using CairoMakie
 
-lattice_size = 64
+lattice_size = 80
 eqsteps = 5_000
 n_steps = 1_00_000
 
-temperature = 1.010
+psuedoTc = Dict(
+            48 => 1.004098703447542,
+            64 => 1.0009103256327856,
+            80 => 0.9997345330528584,
+            96 => 0.9988572671581376,
+            128 => 0.997941002359664)
+
+temperature_rel = 1.011
+temperature = temperature_rel * psuedoTc[lattice_size]
 potts = PottsModel2D(lattice_size, 3, :cold)
 stack=LazyStack(Int)
 cluster=falses(size(potts.lattice))
@@ -34,13 +42,13 @@ fcorr = Figure(fontsize = 20);
 axcorr = Axis(fcorr[1, 1],
     xlabel=L"r",
     ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle",
-    title="Site-Site Correlation Function for L=$lattice_size, T=$temperature",
+    title="Site-Site Correlation Function for L=$lattice_size, T / T_c(L) = $(temperature_rel)",
     xlabelsize = 24, ylabelsize = 24,
     xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
 scatterlines!(axcorr, 0:lattice_size, [ss_corr; 1.0], linestyle=:dashdot, linewidth=2, markersize=18)
-save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_T$(temperature)_L$lattice_size.svg"), fcorr)
+save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
 # display(fcorr)
 
 r_vals = lattice_size÷4 + 2 : 3lattice_size÷4
@@ -82,7 +90,7 @@ a_fit = py"fitted_pars['a'][0]" ± py"fitted_pars['a'][1]"
 
 println("Plotting ...")
 ffit = Figure(fontsize = 20);
-fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T=$temperature \n Fit Parameters: A=$a_fit, ξ=$ξ_fit"
+fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T/T_c(L) = $temperature_rel \n Fit Parameters: A=$a_fit, ξ=$ξ_fit"
 
 axfit = Axis(ffit[1, 1],
     xlabel=L"r",
@@ -98,4 +106,4 @@ fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{
 lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=2)
 axislegend(axfit, position=:ct)
 # display(ffit)
-save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_T$(temperature)_L$lattice_size.svg"), ffit)
+save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)
