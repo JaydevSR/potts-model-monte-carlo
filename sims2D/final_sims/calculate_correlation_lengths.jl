@@ -2,7 +2,7 @@ include("../../src/pottsmc.jl")
 using PyCall
 using CairoMakie
 
-lattice_size = 80
+lattice_size = 64
 eqsteps = 5_000
 n_steps = 1_00_000
 
@@ -28,13 +28,14 @@ ss_corr = ss_correlation_fn(potts.lattice, lattice_size)
 for i in 1:n_steps
     i%1000 == 0 ? print("=") : nothing
     i%10000 == 0 ? print("\n") : nothing
-    for j in 1:20
+    for j in 1:40
         wolff_cluster_update!(potts, temperature, stack=stack, cluster=cluster)
     end
     ss_corr .+= ss_correlation_fn(potts.lattice, lattice_size)
 end
 ss_corr ./= n_steps
 ss_corr ./= maximum(ss_corr)
+ss_corr[2:end] .= (ss_corr[2:end] .+ ss_corr[end:-1:2]) ./ 2
 
 # Fit corr_model to the tail of ss_corr
 
@@ -49,9 +50,9 @@ axcorr = Axis(fcorr[1, 1],
 
 scatterlines!(axcorr, 0:lattice_size, [ss_corr; 1.0], linestyle=:dashdot, linewidth=2, markersize=18)
 save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
-# display(fcorr)
+display(fcorr)
 
-r_vals = lattice_size÷4 + 2 : 3lattice_size÷4
+r_vals = lattice_size÷4 + 5 : 3lattice_size÷4 - 3
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -76,6 +77,7 @@ pars = lmfit.Parameters()
 pars.add_many(('a', 1.0), ('b', 1.0))
 
 parabola_fit = lmfit.minimize(residuals, pars, args=($r_vals, $c_r), method='leastsq')
+chi_red = parabola_fit.redchi
 
 fitted_pars = {}
 for name, param in parabola_fit.params.items():
@@ -87,10 +89,11 @@ println(py"fitted_pars")
 
 a_fit = py"fitted_pars['a'][0]" ± py"fitted_pars['a'][1]"
 ξ_fit = py"fitted_pars['b'][0]" ± py"fitted_pars['b'][1]"
+chi_red_fit = round(py"chi_red", sigdigits=3)
 
 println("Plotting ...")
 ffit = Figure(fontsize = 20);
-fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T/T_c(L) = $temperature_rel \n Fit Parameters: A=$a_fit, ξ=$ξ_fit"
+fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T/T_c(L) = $temperature_rel \n Fit Parameters: A=$a_fit, ξ=$ξ_fit, χ²/d.o.f=$chi_red_fit"
 
 axfit = Axis(ffit[1, 1],
     xlabel=L"r",
@@ -105,5 +108,5 @@ scatter!(axfit, r_vals, c_r, label="numerical data", markersize=18)
 fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{\xi} \right) \right]"
 lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=2)
 axislegend(axfit, position=:ct)
-# display(ffit)
+display(ffit)
 save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)
