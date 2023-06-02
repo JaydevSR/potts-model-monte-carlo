@@ -20,7 +20,7 @@ function potts_correlation_fn(sites::Matrix, L::Int, q::Int)
     return (corrfn ./ nsamples) .- inv(q^2)
 end
 
-lattice_size = 64
+lattice_size = 80
 eqsteps = 20_000
 n_steps = 1_00_000
 
@@ -69,7 +69,7 @@ scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot,
 save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
 display(fcorr)
 
-r_vals = lattice_size÷4 + 4 : 3lattice_size÷4 - 2
+r_vals = lattice_size÷4 : 3lattice_size÷4 + 2
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
