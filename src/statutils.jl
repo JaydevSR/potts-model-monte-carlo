@@ -73,7 +73,7 @@ end
 """
 Calculate two-point correlation function for given lattice of spins.
 """
-function ss_correlation_fn(sites::Matrix, L=Int64; metric=*)
+function ss_correlation_fn(sites::Matrix, L::Int64; metric=*)
     ss_corrs = zeros(Float64, L)
     nsamples = zeros(Float64, L)
     for i=1:L
