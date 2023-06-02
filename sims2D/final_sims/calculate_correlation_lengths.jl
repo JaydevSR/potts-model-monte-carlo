@@ -4,22 +4,24 @@ using CairoMakie
 
 krondelta(x, y) = Int(x == y)
 
-function potts_correlation_fn(sites::Matrix, L::Int, q::Int, α::Int)
+function potts_correlation_fn(sites::Matrix, L::Int, q::Int)
     corrfn = zeros(Float64, L)
     nsamples = zeros(Float64, L)
-    for i=1:L
-        for j=1:L
-            r = abs(i-j)
-            corrfn[r+1] += krondelta(sites[i,i], α) * krondelta(sites[i,j], α) 
-            corrfn[r+1] += krondelta(sites[i,i], α) * krondelta(sites[i,j], α)
-            nsamples[r+1] += 2
+    for α=0:q-1
+        @inbounds for i=1:L
+            for j=1:L
+                r = abs(i-j)
+                corrfn[r+1] += krondelta(sites[i,i], α) * krondelta(sites[i,j], α) 
+                corrfn[r+1] += krondelta(sites[i,i], α) * krondelta(sites[i,j], α)
+                nsamples[r+1] += 2
+            end
         end
     end
     return (corrfn ./ nsamples) .- inv(q^2)
 end
 
-lattice_size = 48
-eqsteps = 5_000
+lattice_size = 64
+eqsteps = 20_000
 n_steps = 1_00_000
 
 psuedoTc = Dict(
@@ -40,18 +42,17 @@ for i=1:eqsteps  # equilibration
 end
 
 println("Calculating the correlation function ...")
-ss_corr = potts_correlation_fn(potts.lattice, lattice_size, 3, 0)
+ss_corr = potts_correlation_fn(potts.lattice, lattice_size, 3)
 for i in 1:n_steps
     i%1000 == 0 ? print("=") : nothing
     i%10000 == 0 ? print("\n") : nothing
     for j in 1:40
         wolff_cluster_update!(potts, temperature, stack=stack, cluster=cluster)
     end
-    ss_corr .+= potts_correlation_fn(potts.lattice, lattice_size, 3, 0)
+    ss_corr .+= potts_correlation_fn(potts.lattice, lattice_size, 3)
 end
 ss_corr ./= n_steps
-ss_corr ./= maximum(ss_corr)
-# ss_corr[2:end] .= (ss_corr[2:end] .+ ss_corr[end:-1:2]) ./ 2
+ss_corr[2:end] .= (ss_corr[2:end] .+ ss_corr[end:-1:2]) ./ 2
 
 # Fit corr_model to the tail of ss_corr
 
@@ -65,10 +66,10 @@ axcorr = Axis(fcorr[1, 1],
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
 scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot, linewidth=2, markersize=18)
-# save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
+save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
 display(fcorr)
 
-r_vals = lattice_size÷4 + 5 : 3lattice_size÷4 - 3
+r_vals = lattice_size÷4 + 4 : 3lattice_size÷4 - 2
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -125,4 +126,4 @@ fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{
 lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=2)
 axislegend(axfit, position=:ct)
 display(ffit)
-# save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)
+save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)
