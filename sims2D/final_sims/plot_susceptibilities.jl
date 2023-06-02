@@ -8,16 +8,16 @@ cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
 max_order = 6
 
-figures = [Figure(resolution = (900, 600), fontsize = 20) for i in 1:max_order]
+figures = [Figure(resolution = (1000, 800), fontsize = 28) for i in 1:max_order]
 axes = [
     Axis(
         figures[1][1, 1],
         xlabel=L"T", ylabel=L"\langle m\rangle",
         title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
-        xlabelsize = 24, ylabelsize = 24,
+        xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
     ),
 
     Axis(
@@ -25,9 +25,9 @@ axes = [
         xlabel=L"T", ylabel=L"\chi",
         title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
-        xlabelsize = 22, ylabelsize = 22,
+        xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
     )
 ]
 
@@ -37,9 +37,9 @@ append!(axes, [
         xlabel = L"T", ylabel = L"\chi_{%$i}",
         title = L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
-        xlabelsize = 22, ylabelsize = 22,
+        xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23,
+        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
     ) for i in 3:max_order
 ])
 
@@ -58,7 +58,7 @@ for stepL in eachindex(lattice_sizes)
         errorbars!(ax, temps, suzzs[order_k, :], errors[order_k, :], color=:black, whiskerwidth=12, label="L = $L")
         scatterlines!(ax, temps, suzzs[order_k, :],
             # color = cols[L],
-            markersize=18, linewidth=4, 
+            markersize=25, linewidth=5, 
             label="L = $L")
     end
 end

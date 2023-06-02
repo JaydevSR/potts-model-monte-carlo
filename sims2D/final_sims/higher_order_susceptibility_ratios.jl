@@ -17,8 +17,8 @@ temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_t
 max_order = 6
 
 order_colors = Dict(:C3C1 => :dodgerblue2, :C4C2 => :orange, :C5C1 => :mediumseagreen, :C6C2 => :orchid3)
-markersize = 18
-linewidth = 4
+markersize = 23
+linewidth = 4.5
 marker = :diamond
 
 psuedoTc = Dict(
@@ -44,28 +44,28 @@ for stepL in eachindex(lattice_sizes)
 
     temps_scaled = round.(temps_scaled, digits=3)
 
-    fig = Figure(resolution=(900, 600), fontsize = 19)
+    fig = Figure(resolution=(1000, 900), fontsize = 26)
     axes = [
         Axis(fig[1, 1],
             title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 24, ylabelsize = 24,
+            xlabelsize = 44, ylabelsize = 44,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4),
 
         Axis(fig[2, 1], ylabel="Ratio",
             title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 24, ylabelsize = 24,   
+            xlabelsize = 44, ylabelsize = 44,   
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23),
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4),
 
         Axis(fig[3, 1], xlabel=L"T / T_c(L)",
             title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
-            xlabelsize = 24, ylabelsize = 24,
+            xlabelsize = 44, ylabelsize = 44,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
+            ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4)
     ]
 
     for ax in axes
