@@ -8,12 +8,12 @@ cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
 max_order = 6
 
-figures = [Figure(resolution = (1000, 800), fontsize = 28) for i in 1:max_order]
+figures = [Figure(resolution = (1000, 800), fontsize = 32) for i in 1:max_order]
 axes = [
     Axis(
         figures[1][1, 1],
-        xlabel=L"T", ylabel=L"\langle m\rangle",
-        title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}",
+        xlabel=L"T (J/k_B)", ylabel=L"\chi_1",
+        # title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
@@ -22,8 +22,8 @@ axes = [
 
     Axis(
         figures[2][1, 1],
-        xlabel=L"T", ylabel=L"\chi",
-        title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}",
+        xlabel=L"T (J/k_B)", ylabel=L"\chi_2",
+        # title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
@@ -34,8 +34,8 @@ axes = [
 append!(axes, [
     Axis(
         figures[i][1, 1],
-        xlabel = L"T", ylabel = L"\chi_{%$i}",
-        title = L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}",
+        xlabel = L"T (J/k_B)", ylabel = L"\chi_{%$i}",
+        # title = L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
         xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
@@ -45,6 +45,8 @@ append!(axes, [
 
 for i in 1:max_order
     xlims!(axes[i], (0.982, 1.022))
+    lines!(axes[i], temps, zero.(temps), linestyle=:dash, color=:black,
+                linewidth=4)
 end
 
 # plot susceptibilities
