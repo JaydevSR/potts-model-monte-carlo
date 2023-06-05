@@ -20,9 +20,9 @@ function potts_correlation_fn(sites::Matrix, L::Int, q::Int)
     return (corrfn ./ nsamples) .- inv(q^2)
 end
 
-lattice_size = 80
+lattice_size = 48
 eqsteps = 20_000
-n_steps = 1_00_000
+n_steps = 50_000
 
 psuedoTc = Dict(
             48 => 1.004098703447542,
@@ -31,7 +31,7 @@ psuedoTc = Dict(
             96 => 0.9988572671581376,
             128 => 0.997941002359664)
 
-temperature_rel = 1.011
+temperature_rel = 1.01
 temperature = temperature_rel * psuedoTc[lattice_size]
 potts = PottsModel2D(lattice_size, 3, :cold)
 stack=LazyStack(Int)
@@ -46,7 +46,7 @@ ss_corr = potts_correlation_fn(potts.lattice, lattice_size, 3)
 for i in 1:n_steps
     i%1000 == 0 ? print("=") : nothing
     i%10000 == 0 ? print("\n") : nothing
-    for j in 1:40
+    for j in 1:15
         wolff_cluster_update!(potts, temperature, stack=stack, cluster=cluster)
     end
     ss_corr .+= potts_correlation_fn(potts.lattice, lattice_size, 3)
@@ -56,20 +56,20 @@ ss_corr[2:end] .= (ss_corr[2:end] .+ ss_corr[end:-1:2]) ./ 2
 
 # Fit corr_model to the tail of ss_corr
 
-fcorr = Figure(fontsize = 20);
+fcorr = Figure(resolution = (1000, 800), fontsize = 32);
 axcorr = Axis(fcorr[1, 1],
     xlabel=L"r",
-    ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle",
+    ylabel=L"C_{\text{Potts}}(r)",
     title="Site-Site Correlation Function for L=$lattice_size, T / T_c(L) = $(temperature_rel)",
-    xlabelsize = 24, ylabelsize = 24,
+    xlabelsize = 46, ylabelsize = 46,
     xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
-scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot, linewidth=2, markersize=18)
+scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot, linewidth=5, markersize=25)
 save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
 display(fcorr)
 
-r_vals = lattice_size÷4 : 3lattice_size÷4 + 2
+r_vals = 12 : lattice_size - 10
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -109,21 +109,22 @@ a_fit = py"fitted_pars['a'][0]" ± py"fitted_pars['a'][1]"
 chi_red_fit = round(py"chi_red", sigdigits=3)
 
 println("Plotting ...")
-ffit = Figure(fontsize = 20);
-fit_title = "Fitting Site-Site Correlation Function for L=$lattice_size, T/T_c(L) = $temperature_rel \n Fit Parameters: A=$a_fit, ξ=$ξ_fit, χ²/d.o.f=$chi_red_fit"
+ffit = Figure(resolution = (1000, 800), fontsize = 32);
+fit_title = "L=$lattice_size, T/T_c(L) = $temperature_rel \n A=$a_fit, ξ=$ξ_fit"
 
 axfit = Axis(ffit[1, 1],
     xlabel=L"r",
-    ylabel=L"C(r) = \langle \sigma(0) \sigma(r) \rangle",
+    ylabel=L"C_{\text{Potts}}(r)",
     title=fit_title,
-    xlabelsize = 24, ylabelsize = 24,
+    xlabelsize = 46, ylabelsize = 46,
     xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
-scatter!(axfit, r_vals, c_r, label="numerical data", markersize=18)
+scatter!(axfit, r_vals, c_r, label="numerical data", markersize=25)
 
 fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{\xi} \right) \right]"
-lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=2)
+lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=5, linestyle=:dash, color=:black)
+
 axislegend(axfit, position=:ct)
 display(ffit)
 save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)

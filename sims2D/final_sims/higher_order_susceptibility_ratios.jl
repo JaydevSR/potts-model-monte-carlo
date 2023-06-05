@@ -44,24 +44,26 @@ for stepL in eachindex(lattice_sizes)
 
     temps_scaled = round.(temps_scaled, digits=3)
 
-    fig = Figure(resolution=(1000, 900), fontsize = 26)
+    fig = Figure(resolution=(1000, 900), fontsize = 28)
+
+    figlabel = Label(fig[1, 1], L"$%$L \times %$L$ lattice", fontsize = 32, tellwidth=false)
     axes = [
-        Axis(fig[1, 1],
-            title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
+        Axis(fig[2, 1],
+            # title=L"\text{Comparison between } \chi_4/\chi_2 \text{ and } \chi_3/\chi_1 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 44, ylabelsize = 44,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4),
 
-        Axis(fig[2, 1], ylabel="Ratio",
-            title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
+        Axis(fig[3, 1], ylabel="Ratio",
+            # title=L"\text{Comparison between } \chi_5/\chi_1 \text{ and } \chi_4/\chi_2 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 44, ylabelsize = 44,   
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
             ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4),
 
-        Axis(fig[3, 1], xlabel=L"T / T_c(L)",
-            title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
+        Axis(fig[4, 1], xlabel=L"T / T_c(L)",
+            # title=L"\text{Comparison between } \chi_6/\chi_2 \text{ and } \chi_5/\chi_1 \text{ for L=%$L}",
             xticks = temps_scaled[1:2:end], yticks = WilkinsonTicks(5),
             xlabelsize = 44, ylabelsize = 44,
             xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
@@ -147,7 +149,7 @@ for stepL in eachindex(lattice_sizes)
     mergedplots = [[lp for (i, lp) in enumerate(plots_in_fig) if labels_in_fig[i] == ul]
             for ul in ulabels]
 
-    Legend(fig[:, 2], mergedplots, ulabels)
+    Legend(fig[:, 2], mergedplots, ulabels, labelsize=32)
 
     save(joinpath("plots", "2DModel", "final_plots", "higher_order_susceptibility_ratios_size$(L).svg"), fig)
 end
