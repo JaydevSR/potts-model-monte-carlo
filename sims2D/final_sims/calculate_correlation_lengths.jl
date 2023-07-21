@@ -69,7 +69,7 @@ scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot,
 save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
 display(fcorr)
 
-r_vals = 12 : lattice_size - 10
+r_vals = 2 : lattice_size
 c_r = ss_corr[r_vals]
 r_vals = collect(r_vals) .- 1
 
@@ -81,9 +81,10 @@ import numpy as np
 def residuals(params, xvals, yvals=None, eps=None):
     a = params['a']
     b = params['b']
+    c = params['c']
     N = $lattice_size
 
-    model = a * (np.exp(xvals / -b) + np.exp((N - xvals) / -b))
+    model = a * (np.exp(xvals / -b) + np.exp((N - xvals) / -b)) + c
     if yvals is None:
         return model
     if eps is None:
@@ -91,7 +92,7 @@ def residuals(params, xvals, yvals=None, eps=None):
     return (model - yvals) / eps
 
 pars = lmfit.Parameters()
-pars.add_many(('a', 1.0), ('b', 1.0))
+pars.add_many(('a', 1.0), ('b', 1.0), ('c', 1.0))
 
 parabola_fit = lmfit.minimize(residuals, pars, args=($r_vals, $c_r), method='leastsq')
 chi_red = parabola_fit.redchi
