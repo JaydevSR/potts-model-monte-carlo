@@ -2,8 +2,8 @@ include("../../src/pottsmc.jl")
 using CairoMakie
 
 # load data
-lattice_sizes = [48, 56, 64, 72, 80]
-cols = Dict([(32, :blue), (48, :red), (56, :pink), (64, :green), (72, :orange), (80, :purple), (96, :cyan), (128, :deepskyblue)])
+lattice_sizes = [48, 56, 64, 80, 72, 96, 128]
+cols = Dict([(128, :steelblue3), (96, :mediumseagreen), (80, :orange), (72, :darkcyan), (64, :orchid3), (56, :green), (48, :purple), (32, :pink)])
 
 temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_temps.txt"), ',', Float64), :)
 max_order = 6
@@ -12,7 +12,7 @@ figures = [Figure(resolution = (1000, 800), fontsize = 32) for i in 1:max_order]
 axes = [
     Axis(
         figures[1][1, 1],
-        xlabel=L"T (J/k_B)", ylabel=L"\chi_1",
+        xlabel=L"T (J/k_B)", ylabel=L"\mathcal{O}",
         # title=L"\langle m \rangle = \frac{1}{L^2\beta} \left[\frac{\partial \ln Z}{\partial h}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
@@ -22,7 +22,7 @@ axes = [
 
     Axis(
         figures[2][1, 1],
-        xlabel=L"T (J/k_B)", ylabel=L"\chi_2",
+        xlabel=L"T (J/k_B)", ylabel=L"\chi",
         # title=L"\chi = \frac{1}{L^2\beta} \left[\frac{\partial^{2} \ln Z}{\partial h^2}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
@@ -38,8 +38,8 @@ append!(axes, [
         # title = L"\chi_{%$i} = \frac{1}{L^2\beta} \left[\frac{\partial^{%$i} \ln Z}{\partial h^{%$i}}\right]_{h \rightarrow 0}",
         xticks = temps[1:2:end],
         xlabelsize = 46, ylabelsize = 46,
-        xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
-        ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
+        xgridstyle = :dot, xgridwidth = 1.1, xgridcolor = :gray23,
+        ygridstyle = :dot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
     ) for i in 3:max_order
 ])
 
@@ -56,12 +56,15 @@ for stepL in eachindex(lattice_sizes)
     errors = readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_suzzs_errors_L$(L).txt"), '\t', Float64)
 
     for order_k in 1:max_order
-        ax = axes[order_k]
-        errorbars!(ax, temps, suzzs[order_k, :], errors[order_k, :], color=:black, whiskerwidth=12, label="L = $L")
-        scatterlines!(ax, temps, suzzs[order_k, :],
-            # color = cols[L],
-            markersize=25, linewidth=5, 
-            label="L = $L")
+        if order_k <= 4 || L != 128 # to not plot 128 on higher orders
+            ax = axes[order_k]
+            errorbars!(ax, temps, suzzs[order_k, :], errors[order_k, :],
+                color=:black, whiskerwidth=16, linewidth=3, label="L = $L")
+            scatterlines!(ax, temps, suzzs[order_k, :],
+                color = cols[L],
+                markersize=25, linewidth=5, 
+                label="L = $L")
+        end
     end
 end
 
