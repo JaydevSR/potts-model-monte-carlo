@@ -19,7 +19,7 @@ function potts_correlation_fn(sites::Matrix, L::Int, q::Int)
     return (corrfn ./ nsamples) .- inv(q^2)
 end
 
-lattice_sizes = [64, 128]
+lattice_sizes = [32, 48, 64]
 eqsteps = 20_000
 n_steps = 50_000
 
