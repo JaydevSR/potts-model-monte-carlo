@@ -8,6 +8,7 @@ temps = reshape(readdlm(joinpath("data", "2DModel", "susceptibilities", "potts_t
 py"""
 import lmfit
 import numpy as np
+from scipy.interpolate import UnivariateSpline
 
 def residuals(params, N, xvals, yvals=None, eps=None):
     a = params['a']
@@ -58,6 +59,9 @@ for lidx in eachindex(lattice_sizes)
         # end
     end
 
+    py"""
+    spline = UnivariateSpline($temps, $ξ_vals, w=$(inv.(ξ_errs)))
+    """
 
     f = Figure(resolution = (1000, 800), fontsize = 32)
     ax = Axis(
@@ -68,9 +72,12 @@ for lidx in eachindex(lattice_sizes)
         ygridstyle = :dot, ygridwidth = 1.1, ygridcolor = :gray23, xticklabelrotation = pi/4
     )
     errorbars!(ax, temps, ξ_vals, ξ_errs, color=:black, whiskerwidth=12)
-    scatter!(ax, temps, ξ_vals, linestyle=:dot, markersize=20, marker=:diamond, linewidth=3.5)
+    scatter!(ax, temps, ξ_vals, markersize=20, marker=:diamond, label="data")
+    lines!(ax, temps, py"spline($temps)", color=:gray23, linestyle=:dash, linewidth=3.5, label="UnivariateSpline")
+    axislegend(ax; position=:rb, merge=true)
     # display(f)
-    save("plots/2Dmodel/correlations/potts_xi_vs_T_L$L.svg", f)
+
+    save("plots/2Dmodel/final_plots/potts_xi_vs_T_L$L.svg", f)
 
     open(joinpath("data", "2DModel", "correlations", "potts_corrlen_values_L$(L).txt"), "w") do f
         writedlm(f, ξ_vals)
