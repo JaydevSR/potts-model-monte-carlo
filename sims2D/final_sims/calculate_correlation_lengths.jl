@@ -32,7 +32,7 @@ psuedoTc = Dict(
             128 => 0.997941002359664)
 
 temperature_rel = 1.01
-temperature = temperature_rel * psuedoTc[lattice_size]
+temperature = 1.01 # temperature_rel * psuedoTc[lattice_size]
 potts = PottsModel2D(lattice_size, 3, :cold)
 stack=LazyStack(Int)
 cluster=falses(size(potts.lattice))
@@ -60,18 +60,17 @@ fcorr = Figure(resolution = (1000, 800), fontsize = 32);
 axcorr = Axis(fcorr[1, 1],
     xlabel=L"r",
     ylabel=L"C_{\text{Potts}}(r)",
-    title="Site-Site Correlation Function for L=$lattice_size, T / T_c(L) = $(temperature_rel)",
+    title="Site-Site Correlation Function for L=$lattice_size, T = $(temperature)",
     xlabelsize = 46, ylabelsize = 46,
     xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
 scatterlines!(axcorr, 0:lattice_size, [ss_corr; ss_corr[1]], linestyle=:dashdot, linewidth=5, markersize=25)
-save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_Tr$(temperature_rel)_L$lattice_size.svg"), fcorr)
+save(joinpath("plots", "2DModel", "final_plots", "spin_correlation_function_T$(temperature)_L$lattice_size.svg"), fcorr)
 display(fcorr)
 
-r_vals = 2 : lattice_size
-c_r = ss_corr[r_vals]
-r_vals = collect(r_vals) .- 1
+r_vals = collect(2:lattice_size-1)
+c_r = ss_corr[r_vals .+ 1]
 
 println("Making fits ...")
 py"""
@@ -101,7 +100,7 @@ fitted_pars = {}
 for name, param in parabola_fit.params.items():
     fitted_pars[name] = (param.value, param.stderr)
 
-min_series = residuals(parabola_fit.params, $r_vals)
+min_series = residuals(parabola_fit.params, $([1; r_vals]))
 """
 println(py"fitted_pars")
 
@@ -111,7 +110,7 @@ chi_red_fit = round(py"chi_red", sigdigits=3)
 
 println("Plotting ...")
 ffit = Figure(resolution = (1000, 800), fontsize = 32);
-fit_title = "L=$lattice_size, T/T_c(L) = $temperature_rel \n A=$a_fit, ξ=$ξ_fit"
+fit_title = "L=$lattice_size, T = $temperature \n A=$a_fit, ξ=$ξ_fit"
 
 axfit = Axis(ffit[1, 1],
     xlabel=L"r",
@@ -121,11 +120,12 @@ axfit = Axis(ffit[1, 1],
     xgridstyle = :dashdot, xgridwidth = 1.1, xgridcolor = :gray23,
     ygridstyle = :dashdot, ygridwidth = 1.1, ygridcolor = :gray23)
 
-scatter!(axfit, r_vals, c_r, label="numerical data", markersize=25)
+scatter!(axfit, r_vals[1:end-1], c_r[1:end-1], label="numerical data", markersize=25)
 
 fit_eqn = L"A \left[ \exp\left(-\frac{r}{\xi} \right) + \exp\left(-\frac{L - r}{\xi} \right) \right]"
-lines!(axfit, r_vals, py"min_series", label=fit_eqn, linewidth=5, linestyle=:dash, color=:black)
+lines!(axfit, [1; r_vals], py"min_series", label=fit_eqn, linewidth=5, linestyle=:dash, color=:black)
+xlims!(axfit, (0, lattice_size))
 
 axislegend(axfit, position=:ct)
 display(ffit)
-save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_Tr$(temperature_rel)_L$lattice_size.svg"), ffit)
+save(joinpath("plots", "2DModel", "final_plots", "fit_correlation_length_T$(temperature_rel)_L$lattice_size.svg"), ffit)
